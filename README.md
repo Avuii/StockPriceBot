@@ -1,594 +1,582 @@
 <p align="center">
-  <img src="docs/logo.png" alt="StockPriceBot Logo" width="180" />
+  <img src="docs/logo.png" alt="StockPriceBot logo" width="180" />
 </p>
 
 <h1 align="center">StockPriceBot</h1>
 
 <p align="center">
-  <strong>Smart product price and stock monitoring with a browser extension, dashboard and automated alerts.</strong>
+  <strong>Product price and availability monitoring with a browser extension, web dashboard, and automated alerts.</strong>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-active%20development-F59E0B?style=for-the-badge" alt="Status" />
-  <img src="https://img.shields.io/badge/browser-extension-111827?style=for-the-badge" alt="Browser Extension" />
-  <img src="https://img.shields.io/badge/backend-ASP.NET%20Core-512BD4?style=for-the-badge" alt="ASP.NET Core" />
-  <img src="https://img.shields.io/badge/frontend-React%20%2B%20TypeScript-2563EB?style=for-the-badge" alt="React TypeScript" />
-  <img src="https://img.shields.io/badge/database-PostgreSQL-336791?style=for-the-badge" alt="PostgreSQL" />
+  <img
+    src="https://img.shields.io/badge/status-active%20development-F59E0B?style=for-the-badge"
+    alt="Status: active development"
+  />
+  <img
+    src="https://img.shields.io/badge/Browser%20Extension-111827?style=for-the-badge&logo=googlechrome&logoColor=white"
+    alt="Browser extension"
+  />
+  <img
+    src="https://img.shields.io/badge/ASP.NET%20Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white"
+    alt="ASP.NET Core"
+  />
+  <img
+    src="https://img.shields.io/badge/React-2563EB?style=for-the-badge&logo=react&logoColor=white"
+    alt="React"
+  />
+  <img
+    src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white"
+    alt="TypeScript"
+  />
+  <img
+    src="https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white"
+    alt="PostgreSQL"
+  />
+  <img
+    src="https://img.shields.io/badge/MIT-22C55E?style=for-the-badge&logo=opensourceinitiative&logoColor=white"
+    alt="MIT License"
+  />
 </p>
 
 ---
 
-<a id="table-of-contents"></a>
-## 📚 Table of Contents
+## Table of Contents
 
 - [Overview](#overview)
-- [Problem](#problem)
-- [Solution](#solution)
+- [Key Features](#key-features)
+- [Interface Preview](#interface-preview)
+- [Architecture](#architecture)
 - [How It Works](#how-it-works)
-- [Main Features](#main-features)
-- [System Architecture](#system-architecture)
-- [Browser Extension](#browser-extension)
-- [Dashboard](#dashboard)
-- [Backend](#backend)
-- [Product Data Extraction Strategy](#product-data-extraction-strategy)
-- [Example Product Card](#example-product-card)
 - [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Alert Types](#alert-types)
+- [Repository Structure](#repository-structure)
+- [Getting Started](#getting-started)
+- [Email Configuration](#email-configuration)
+- [Product Data Extraction](#product-data-extraction)
+- [Alerts](#alerts)
+- [API Overview](#api-overview)
+- [Testing and Build](#testing-and-build)
+- [Privacy and Transparency](#privacy-and-transparency)
+- [Known Limitations](#known-limitations)
 - [Roadmap](#roadmap)
-- [Future Improvements](#future-improvements)
 - [Project Status](#project-status)
 - [License](#license)
 - [Author](#author)
 
 ---
 
-<a id="overview"></a>
-## 🛒 Overview
+## Overview
 
-**StockPriceBot** is a full-stack price and stock monitoring platform that helps users track selected products from online stores and receive notifications when the best buying moment appears.
+**StockPriceBot** is a full-stack application for tracking product prices, availability, and selected variants across online stores.
 
-The application combines a **browser extension**, a **backend API with scheduled product checks**, a **web dashboard**, and a **notification system**.
+Users can add a product manually from the dashboard or capture it directly from the currently opened product page with the Chrome extension. The system then checks the product at scheduled intervals, stores its history, evaluates alert rules, and sends an email when a relevant change occurs.
 
-Users can visit a product page, add the product to their watchlist using the browser extension, set alert rules, and let the system automatically monitor price and availability changes.
+The project combines:
+
+- a **React dashboard** for managing products, categories, alerts, and account settings,
+- a **Chrome extension** for collecting product data from store pages,
+- an **ASP.NET Core API** for authentication and application operations,
+- a **Quartz.NET worker** for scheduled monitoring,
+- a **PostgreSQL database** for persistent data and history,
+- and **email notifications** for price and availability events.
+
+### Static Demo
+
+A lightweight GitHub Pages preview is available in the [`demo/`](demo/) directory. It uses screenshots from `docs/` and does not require the backend, database, package installation, or a build step.
+
+After GitHub Pages is enabled for the repository root, the demo can be published at:
+
+```text
+https://<your-username>.github.io/StockPriceBot/demo/
+```
+
+Publishing instructions are available in [`demo/README.md`](demo/README.md).
 
 ---
 
-<a id="problem"></a>
-## ⚠️ Problem
+## Key Features
 
-Products often:
+### Product Monitoring
 
-- go out of stock and return without any clear notification,
-- change price frequently,
-- become worth buying only after reaching a specific price threshold,
-- require users to manually refresh product pages,
-- cause users to miss good deals or restocks.
+- Add products from the dashboard or browser extension.
+- Track product URL, store, image, category, current price, and target price.
+- Save product variants such as size and color.
+- Add personal notes and enable or pause monitoring.
+- Store price, availability, alert, and monitoring history.
+- Display product health states such as successful check, selector issue, blocked store, or unreadable page.
 
-Example:
+### Organization and Discovery
 
-A user wants to buy a product only when its price drops to **50 PLN or less**.  
-Instead of checking the page manually every day, StockPriceBot monitors the product automatically and sends an alert when the condition is met.
+- Create custom categories with Lucide icons and colors.
+- Use list or image-based product views.
+- Search, filter, and sort tracked products.
+- Perform bulk actions.
+- Maintain a separate watchlist for high-priority products.
+- Import wishlist data and export products to CSV.
 
----
+### Alerts and Insights
 
-<a id="solution"></a>
-## ✅ Solution
+- Receive alerts when a product reaches its target price.
+- Receive notifications after a configured percentage price drop.
+- Detect back-in-stock events.
+- Monitor selected size and color variants.
+- Review recent alerts, price history, savings, statistics, and top opportunities.
+- Configure anti-spam rules and daily notification limits.
 
-StockPriceBot allows users to track products from stores such as:
+### User Experience
 
-- Reserved,
-- Zalando,
-- Media Expert,
-- Sephora,
-- Empik,
-- and other online shops.
-
-The user opens a product page and clicks the browser extension button:
-
-```txt
-Watch this product
-```
-
-The extension detects and saves:
-
-```txt
-product name
-current price
-product URL
-product image
-stock availability
-store name
-```
-
-Then the user defines alert conditions, for example:
-
-```txt
-Notify me when:
-- the price drops to 50 PLN or less
-- the product is back in stock
-- the price drops by 20%
-```
-
-After that, the backend periodically checks the product and sends a notification when the selected condition is met.
+- Responsive React dashboard.
+- Light and dark themes with a consistent visual identity.
+- Polish and English interface support.
+- Clear privacy information about data read by the browser extension.
 
 ---
 
-<a id="how-it-works"></a>
-## 🔄 How It Works
+## Interface Preview
 
-```txt
-User opens product page
-        |
-        v
-Browser extension detects product data
-        |
-        v
-User sets alert conditions
-        |
-        v
-Backend saves product and starts monitoring
-        |
-        v
-Scheduler checks price and stock periodically
-        |
-        v
-Dashboard displays current status and history
-        |
-        v
-Notification is sent when an alert condition is met
-```
+The images below are compact previews. Full-size screenshots are available in the [`docs/`](docs/) directory.
 
----
+| Dashboard | Product Management |
+| --- | --- |
+| <img src="docs/dashboard.png" alt="StockPriceBot dashboard" width="380" /> | <img src="docs/productswithpanel.png" alt="Tracked products with category panel" width="380" /> |
 
-<a id="main-features"></a>
-## ✨ Main Features
+| Categories | Alerts |
+| --- | --- |
+| <img src="docs/Categories.png" alt="Product categories" width="380" /> | <img src="docs/alerts.png" alt="Price and availability alerts" width="380" /> |
 
-Current MVP scope:
+| Statistics | Settings |
+| --- | --- |
+| <img src="docs/Statistics.png" alt="Product monitoring statistics" width="380" /> | <img src="docs/settings.png" alt="Account and application settings" width="380" /> |
 
-- add a product directly from the current browser tab,
-- automatically detect product title, price, image, URL and availability,
-- set a custom target price,
-- monitor whether the product is available or out of stock,
-- notify the user when the price drops below the selected threshold,
-- notify the user when the product returns to stock,
-- store product price history,
-- display price changes on a chart,
-- organize products into user-defined categories,
-- edit or delete tracked products,
-- view the last product check time,
-- display alert status for every product.
+<details>
+<summary><strong>Show additional screenshots</strong></summary>
 
----
+<br />
 
-<a id="system-architecture"></a>
-## 🧱 System Architecture
+| Dashboard Details | Products Without Panel |
+| --- | --- |
+| <img src="docs/dashboard2.png" alt="Dashboard details" width="380" /> | <img src="docs/productswithoutpanel.png" alt="Products without category panel" width="380" /> |
 
-```txt
-[Browser Extension]
-        |
-        v
-[Backend API + Scheduler]
-        |
-        v
-[Dashboard Web App]
-        |
-        v
-[Notifications]
-```
+| Watchlist | Category Management |
+| --- | --- |
+| <img src="docs/watchlist.png" alt="Product watchlist" width="380" /> | <img src="docs/Categories2.png" alt="Category management" width="380" /> |
 
-The browser extension is used for quickly adding products from online stores.  
-The backend handles persistent monitoring, scheduled checks and notifications.  
-The dashboard gives the user a clear overview of tracked products, price history and active alerts.
+| Products by Category | Statistics Details |
+| --- | --- |
+| <img src="docs/Categories3.png" alt="Products grouped by category" width="380" /> | <img src="docs/Statistics2.png" alt="Detailed monitoring statistics" width="380" /> |
+
+| Alert Settings | Login |
+| --- | --- |
+| <img src="docs/settings2.png" alt="Alert settings" width="380" /> | <img src="docs/loginpanel.png" alt="Login panel" width="380" /> |
+
+| Dark Dashboard | Dark Product View |
+| --- | --- |
+| <img src="docs/dark.png" alt="Dashboard in dark theme" width="380" /> | <img src="docs/dark2.png" alt="Product view in dark theme" width="380" /> |
+
+| Dark Statistics | Dark Login |
+| --- | --- |
+| <img src="docs/dark3.png" alt="Statistics in dark theme" width="380" /> | <img src="docs/dark4.png" alt="Login panel in dark theme" width="380" /> |
+
+</details>
 
 ---
 
-<a id="browser-extension"></a>
-## 🧩 Browser Extension
+## Architecture
 
-The browser extension is responsible for capturing product data from the currently opened page.
-
-### MVP Features
-
-- detect product title,
-- detect current price,
-- detect product image,
-- detect product URL,
-- detect stock availability,
-- allow the user to set a target price,
-- send the product to the backend API.
-
-### Example Flow
-
-```txt
-1. User opens a product page.
-2. User clicks the StockPriceBot extension icon.
-3. The extension detects product data.
-4. User enters a target price, for example 50 PLN.
-5. User clicks "Save".
-6. Product is added to the monitoring system.
+```mermaid
+flowchart LR
+    Extension["Chrome Extension"] --> API["ASP.NET Core API"]
+    Dashboard["React Dashboard"] <--> API
+    API <--> DB[("PostgreSQL")]
+    Worker["Quartz.NET Worker"] <--> DB
+    Worker --> Stores["Product Pages"]
+    Worker --> Mail["Email Notifications"]
+    API --> Hub["SignalR Hub"]
+    Hub --> Dashboard
 ```
 
-### Example Extension Popup
+### Component Responsibilities
 
-```txt
-StockPriceBot
-────────────────────
-Name: Nike Air Force 1
-Price: 419 PLN
-Status: In stock
-
-[ Target price: 350 PLN ]
-
-[x] Notify me when the price drops
-[x] Notify me when the product is back in stock
-
-[ Watch product ]
-```
-
-### Manual Selection Mode
-
-If the extension cannot detect the price automatically, the user can manually select the price element on the page.
-
-```txt
-Price not detected.
-Click the price on the page to select it manually.
-```
-
-The extension can then save a CSS selector, for example:
-
-```txt
-priceSelector = ".product-price"
-stockSelector = ".availability"
-```
-
-This makes the system more flexible and allows it to support many different stores.
+| Component | Responsibility |
+| --- | --- |
+| Chrome Extension | Reads product data from the current page and sends it to the API. |
+| React Dashboard | Manages products, categories, settings, history, alerts, and statistics. |
+| ASP.NET Core API | Handles authentication, application operations, validation, and dashboard data. |
+| Quartz.NET Worker | Runs scheduled checks, evaluates alert rules, and creates monitoring records. |
+| PostgreSQL | Stores accounts, products, categories, histories, settings, and alert logs. |
+| SignalR | Delivers live price and status updates to the dashboard. |
+| SMTP Service | Sends price and availability notifications by email. |
 
 ---
 
-<a id="dashboard"></a>
-## 📊 Dashboard
+## How It Works
 
-The dashboard is the main place for managing tracked products.
-
-### Views
-
-- tracked products list,
-- product categories created by the user,
-- current price,
-- target alert price,
-- availability status,
-- price history,
-- price chart,
-- last checked time,
-- alert status,
-- edit target price,
-- remove product.
-
-### Dashboard Cards
-
-The dashboard can include summary cards such as:
-
-```txt
-Tracked Products
-Products In Stock
-Products Below Target Price
-Alerts Sent Today
-```
-
-### Product Details View
-
-Each product can have a details page with:
-
-- product image,
-- current price,
-- target price,
-- availability status,
-- store name,
-- original product link,
-- price history chart,
-- alert configuration,
-- last check date,
-- notification history.
+1. The user opens a product page in a supported browser.
+2. The Chrome extension detects the product name, price, image, store, availability, and visible variant information.
+3. The user reviews the detected data, sets alert rules, and saves the product.
+4. The API validates and stores the product in PostgreSQL.
+5. The worker checks active products according to their configured refresh intervals.
+6. Each successful check can update price history, availability history, and monitoring logs.
+7. When an alert condition is met, the system records the event and sends an email notification.
+8. The dashboard displays the latest product state and receives live updates through SignalR.
 
 ---
 
-<a id="backend"></a>
-## ⚙️ Backend
-
-The backend is the core of the system.
-
-It is responsible for:
-
-- saving tracked products,
-- storing user-defined categories,
-- storing alert rules,
-- checking product prices periodically,
-- checking product availability,
-- saving price history,
-- detecting alert conditions,
-- sending notifications,
-- exposing API endpoints for the dashboard and extension.
-
-The backend is required because the browser extension alone is not enough for reliable monitoring.  
-If the browser is closed, the extension cannot consistently check products.  
-The backend solves this by running scheduled checks independently.
-
----
-
-<a id="product-data-extraction-strategy"></a>
-## 🔎 Product Data Extraction Strategy
-
-Different online stores use different HTML structures. Because of that, StockPriceBot should not rely on only one extraction method.
-
-The extraction strategy is hybrid.
-
-### Level 1: Saved Selectors
-
-The extension can save CSS selectors from the product page.
-
-Example:
-
-```txt
-priceSelector = ".product-price"
-stockSelector = ".availability"
-```
-
-The backend can later use those selectors to read the same data from the page.
-
-This approach is fast to implement, but it may break when the store changes its HTML structure.
-
-### Level 2: Structured Product Data
-
-Before relying on custom selectors, the system should try to read structured product data from:
-
-```txt
-JSON-LD
-Open Graph tags
-meta tags
-schema.org/Product
-```
-
-Many stores expose product data in a structured format.
-
-Example:
-
-```json
-{
-  "@type": "Product",
-  "name": "Example Product",
-  "offers": {
-    "price": "49.99",
-    "availability": "InStock"
-  }
-}
-```
-
-This approach is more stable than guessing data from CSS classes.
-
-### Level 3: Dynamic Pages
-
-Some stores load prices dynamically using JavaScript.  
-For those pages, the backend can use **Playwright** as a fallback.
-
-Playwright opens the page like a real browser and reads the final rendered content.
-
-### Final Extraction Order
-
-```txt
-1. Try JSON-LD / schema.org data
-2. Try meta tags and Open Graph data
-3. Try selectors saved by the browser extension
-4. Use Playwright as a fallback for dynamic pages
-```
-
----
-
-<a id="example-product-card"></a>
-## 🧾 Example Product Card
-
-```txt
-Nike Air Force 1
-
-Current price: 419 PLN
-Target price: 350 PLN
-Status: In stock
-Last checked: 2026-06-10 18:42
-Alert status: Waiting
-```
-
----
-
-<a id="tech-stack"></a>
-## 🛠️ Tech Stack
-
-### Frontend Dashboard
-
-```txt
-React
-TypeScript
-Vite
-TailwindCSS
-Recharts
-```
-
-### Browser Extension
-
-```txt
-Chrome Extension
-Manifest V3
-React
-TypeScript
-Content Scripts
-Background Service Worker
-```
+## Tech Stack
 
 ### Backend
 
-```txt
-ASP.NET Core Web API
-Entity Framework Core
-PostgreSQL
-Hangfire or Quartz.NET
-SignalR
-Playwright
-```
+- ASP.NET Core Web API
+- Entity Framework Core
+- PostgreSQL
+- Quartz.NET
+- SignalR
+- PBKDF2 password hashing
+- SMTP email notifications
+- Docker Compose
 
-### Notifications
+### Dashboard
 
-Notification channels planned for the application:
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- Recharts
+- Lucide React
+- SignalR client
 
-```txt
-Telegram Bot
-Email
-Web Push Notifications
-Discord Webhook
-```
+### Browser Extension
+
+- Chrome Extension Manifest V3
+- React
+- TypeScript
+- Content scripts
+- Background service worker
+- `chrome.storage` for local extension settings and token storage
 
 ---
 
-<a id="project-structure"></a>
-## 📁 Project Structure
+## Repository Structure
 
-```txt
+```text
 StockPriceBot/
 ├── backend/
-│   ├── StockPriceBot.Api/
-│   ├── StockPriceBot.Application/
-│   ├── StockPriceBot.Domain/
-│   └── StockPriceBot.Infrastructure/
+│   ├── src/
+│   │   ├── PriceStockBot.Api/              # HTTP endpoints, auth, SignalR, configuration
+│   │   ├── PriceStockBot.Core/             # Domain models, alert rules, and ports
+│   │   ├── PriceStockBot.Infrastructure/   # EF Core, extraction, email, services
+│   │   └── PriceStockBot.Worker/           # Quartz.NET scheduled monitoring jobs
+│   └── tests/
+│       └── PriceStockBot.Tests/            # Parser and alert-rule tests
 │
-├── dashboard/
-│   └── React + TypeScript dashboard
+├── frontend/
+│   ├── dashboard/
+│   │   └── src/
+│   │       ├── app/                        # App-level types and view helpers
+│   │       └── components/
+│   │           ├── categories/             # Category management
+│   │           ├── charts/                 # Price and savings charts
+│   │           ├── common/                 # Shared UI controls
+│   │           ├── layout/                 # Navigation and application shell
+│   │           ├── products/               # Cards, forms, filters, and details
+│   │           └── settings/               # Account and notification settings
+│   └── extension/
+│       └── src/
+│           ├── popup/                      # Extension popup interface
+│           ├── background.ts               # Background service worker
+│           └── content.ts                  # Product-page data extraction
 │
-├── extension/
-│   └── Chrome Extension + React
-│
-├── docs/
-│   └── logo.png
-│
+├── demo/                                   # Static GitHub Pages preview
+├── docs/                                   # Logo and interface screenshots
+├── docker-compose.yml                      # PostgreSQL, API, and worker services
+├── .env.example                            # Local environment template
 ├── LICENSE
 └── README.md
 ```
 
 ---
 
-<a id="alert-types"></a>
-## 🔔 Alert Types
+## Getting Started
 
-Supported and planned alert rules:
+### Requirements
 
-```txt
-price drops below target price
-product is back in stock
-price drops by selected percentage
-any price change
+- Docker Desktop with the Linux engine enabled
+- .NET SDK 8
+- Node.js 20 or newer
+- Chrome or another Chromium-based browser
+
+### 1. Create the Local Environment File
+
+PowerShell:
+
+```powershell
+Copy-Item .env.example .env
 ```
 
-Example conditions:
+Bash:
 
-```txt
-currentPrice <= targetPrice
-oldStatus = OutOfStock and newStatus = InStock
-oldPrice - newPrice >= selectedPercentage
-oldPrice != newPrice
+```bash
+cp .env.example .env
 ```
 
-To avoid notification spam, the backend should store when an alert was last triggered.
+The default PostgreSQL values can be used for local development. SMTP variables are required only when testing email delivery.
+
+### 2. Start the API, Worker, and Database
+
+```bash
+docker compose up --build
+```
+
+Default local services:
+
+| Service | Address |
+| --- | --- |
+| API | `http://localhost:5080` |
+| PostgreSQL | `localhost:5432` |
+
+EF Core migrations are applied automatically when the API and worker start.
+
+> [!TIP]
+> If Docker reports a `dockerDesktopLinuxEngine` pipe error, open Docker Desktop and wait until the Linux engine is ready before running the command again.
+
+### 3. Start the Dashboard
+
+```bash
+npm --prefix frontend/dashboard install
+npm --prefix frontend/dashboard run dev
+```
+
+The default dashboard address is:
+
+```text
+http://localhost:5187
+```
+
+If the port is already in use, update the development script in `frontend/dashboard/package.json`.
+
+### 4. Build and Load the Chrome Extension
+
+```bash
+npm --prefix frontend/extension install
+npm --prefix frontend/extension run build
+```
+
+Then:
+
+1. Open `chrome://extensions`.
+2. Enable **Developer mode**.
+3. Select **Load unpacked**.
+4. Choose `frontend/extension/dist`.
+5. Open the dashboard settings and copy the API token.
+6. Paste the token into the extension if it was not synchronized automatically.
+
+The extension attempts to detect the product name, price, image, URL, store, availability, size, color, and category suggestion. When automatic price detection fails, the user can select the price element manually.
 
 ---
 
-<a id="roadmap"></a>
-## 🗺️ Roadmap
+## Email Configuration
 
-### Stage 1: Backend and Database
+The sender account is configured at application level. Individual users only provide the recipient address for alerts in the dashboard.
 
-- create ASP.NET Core Web API,
-- configure PostgreSQL,
-- create product, category, alert and history models,
-- create CRUD endpoints for tracked products,
-- create endpoints for browser extension.
+Example Gmail SMTP configuration:
 
-### Stage 2: Dashboard
+```dotenv
+EMAIL_ENABLED=true
+EMAIL_SMTP_HOST=smtp.gmail.com
+EMAIL_SMTP_PORT=587
+EMAIL_USERNAME=stockpricebotalert@gmail.com
+EMAIL_PASSWORD=google-app-password
+EMAIL_FROM=stockpricebotalert@gmail.com
+EMAIL_FROM_NAME=StockPriceBot
+EMAIL_ENABLE_SSL=true
+```
 
-- create React dashboard,
-- display tracked products,
-- add product manually by URL,
-- edit target price,
-- delete product,
-- create and manage categories.
+For Gmail, use a **Google App Password** instead of the regular account password. After configuring the alert address in the dashboard, use the **Send test** action to verify delivery.
 
-### Stage 3: Product Checker
-
-- implement price extraction service,
-- implement availability extraction,
-- save price history,
-- run scheduled checks with Hangfire or Quartz.NET.
-
-### Stage 4: Notifications
-
-- add Telegram notifications,
-- send alert when price is below target,
-- send alert when product is back in stock,
-- store notification history.
-
-### Stage 5: Browser Extension
-
-- create Manifest V3 extension,
-- build popup UI,
-- detect product data on the current page,
-- send product data to the backend,
-- support manual selector selection.
-
-### Stage 6: Advanced Features
-
-- add price charts,
-- add SignalR live dashboard updates,
-- add store-specific adapters,
-- add Web Push notifications,
-- add import and export of watchlists,
-- add smarter alert rules.
+> [!IMPORTANT]
+> Never commit real credentials or application passwords. Store local secrets in `.env`, and keep that file excluded from version control.
 
 ---
 
-<a id="future-improvements"></a>
-## 🚀 Future Improvements
+## Product Data Extraction
 
-- store-specific adapters for popular shops,
-- AI-assisted product data detection,
-- automatic category suggestions,
-- product comparison between stores,
-- price drop probability insights,
-- public product watchlists,
-- shared wishlists,
-- mobile-friendly dashboard,
-- browser notification support,
-- user accounts and authentication,
-- deployment with Docker.
+Online stores expose product data in different formats, so StockPriceBot uses a layered extraction strategy.
 
----
+### Extraction Order
 
-<a id="project-status"></a>
-## 🟡 Project Status
+1. JSON-LD and `schema.org/Product` data.
+2. Open Graph and standard metadata.
+3. CSS selectors detected or saved by the browser extension.
+4. A manually selected price element.
+5. A monitoring error state when the page cannot be read reliably.
 
-StockPriceBot is currently under **active development**.
+### Monitoring Flow
 
-The project is being built as a practical full-stack application that solves a real everyday problem: missing price drops and product restocks.
+The worker loads active products that are due for a check according to the refresh interval selected in account settings, such as every 15 minutes, 30 minutes, 1 hour, 3 hours, or once per day.
 
----
+Each check can update:
 
-<a id="license"></a>
-## 📄 License
-
-This project is licensed under the **MIT License**.
-
-You are free to use, modify and distribute this project under the terms of the MIT License.  
-See the `LICENSE` file for more details.
+- current price,
+- availability,
+- selected variant state,
+- price history,
+- availability history,
+- monitoring status,
+- and the latest readable error message.
 
 ---
 
-<a id="author"></a>
-## 👩‍💻 Author
+## Alerts
 
-Created by **Katarzyna Stańczyk**.
+Alerts can be triggered when:
 
+- a product reaches or falls below its target price,
+- the price drops by a configured percentage,
+- an unavailable product returns to stock,
+- a selected size or color becomes available,
+- or the current price is close to the target price.
+
+Available anti-spam controls include:
+
+- minimum discount percentage,
+- maximum emails per product per day,
+- daily digest mode,
+- selected-variant-only alerts,
+- back-in-stock alerts,
+- and below-target alerts.
+
+---
+
+## API Overview
+
+```text
+POST   /api/auth/register
+POST   /api/auth/login
+POST   /api/auth/forgot-password
+POST   /api/auth/reset-password
+GET    /api/auth/me
+POST   /api/auth/logout
+
+GET    /api/account/settings
+PATCH  /api/account/settings
+POST   /api/account/settings/test-email
+
+GET    /api/products
+GET    /api/products/{id}
+POST   /api/products
+PATCH  /api/products/{id}
+DELETE /api/products/{id}
+GET    /api/products/{id}/history
+POST   /api/products/{id}/check
+POST   /api/products/preview
+
+GET    /api/categories
+POST   /api/categories
+PATCH  /api/categories/{id}
+DELETE /api/categories/{id}
+
+GET    /api/dashboard/stats
+GET    /hubs/price-updates
+```
+
+---
+
+## Testing and Build
+
+### Backend Tests
+
+```bash
+dotnet test
+```
+
+### Dashboard Production Build
+
+```bash
+npm --prefix frontend/dashboard run build
+```
+
+### Extension Production Build
+
+```bash
+npm --prefix frontend/extension run build
+```
+
+---
+
+## Privacy and Transparency
+
+The browser extension reads only the data needed to save and monitor a product:
+
+- product name,
+- current price,
+- product image,
+- product URL,
+- store name,
+- availability,
+- selected size and color when detectable,
+- and a user-selected price selector when manual selection is used.
+
+The API token is stored locally with `chrome.storage` and is used only for communication with the StockPriceBot backend. The extension does not replace affiliate links, modify coupon codes, or alter store content.
+
+Account passwords are stored as secure hashes and are never persisted as plain text.
+
+---
+
+## Known Limitations
+
+- Some stores block regular HTTP requests or require anti-bot verification.
+- JavaScript-heavy pages may not expose the final price in the initial HTML response.
+- Product page changes can invalidate previously saved CSS selectors.
+- Variant detection works best when the selected size or color is visible on the page.
+- Email delivery requires valid SMTP configuration.
+- A browser-rendering fallback for difficult pages is planned but is not yet part of the default monitoring pipeline.
+
+When a page cannot be processed safely, StockPriceBot records a monitoring error instead of silently storing unreliable data.
+
+---
+
+## Roadmap
+
+### Completed
+
+- [x] ASP.NET Core API with user accounts and token authentication
+- [x] PostgreSQL persistence with Entity Framework Core migrations
+- [x] React dashboard with light and dark themes
+- [x] Chrome extension for adding products from store pages
+- [x] Product variants including size, color, category, note, and image
+- [x] Backend-based watchlist
+- [x] Price, availability, monitoring, and alert histories
+- [x] Email alert settings and test email action
+- [x] Category management with custom Lucide icons and colors
+- [x] Search, filtering, sorting, bulk actions, CSV export, and wishlist import
+
+### Planned
+
+- [ ] Store-specific adapters for popular e-commerce platforms
+- [ ] Playwright fallback for JavaScript-heavy pages
+- [ ] Web push notifications
+- [ ] Improved multi-URL and CSV import workflow
+- [ ] End-to-end tests for dashboard and extension flows
+- [ ] Production deployment on a low-cost cloud stack
+- [ ] Cross-store product comparison
+- [ ] Smarter recommendations based on price history
+
+---
+
+## Project Status
+
+StockPriceBot is under **active development**.
+
+The core full-stack architecture is in place, including the API, database, worker, dashboard, browser extension, and email notification flow. Current work focuses on improving extraction reliability, store compatibility, automated testing, and production deployment.
+
+---
+
+## License
+
+This project is licensed under the **MIT License**. See the [`LICENSE`](LICENSE) file for details.
+
+---
+
+## Author
+
+Created by **Katarzyna Stańczyk**
