@@ -80,17 +80,8 @@ The project combines:
 - a **PostgreSQL database** for persistent data and history,
 - and **email notifications** for price and availability events.
 
-### Static Demo
+### Demo
 
-A lightweight GitHub Pages preview is available in the [`demo/`](demo/) directory. It uses screenshots from `docs/` and does not require the backend, database, package installation, or a build step.
-
-After GitHub Pages is enabled for the repository root, the demo can be published at:
-
-```text
-https://<your-username>.github.io/StockPriceBot/demo/
-```
-
-Publishing instructions are available in [`demo/README.md`](demo/README.md).
 
 ---
 
