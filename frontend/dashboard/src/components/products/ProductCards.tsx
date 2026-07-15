@@ -53,10 +53,10 @@ export function ProductRow({
 
   return (
     <article
-      className="relative grid gap-3 overflow-visible rounded-[1.35rem] border border-slate-200 bg-white p-3 pb-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-[#28344C] dark:bg-[#151D30] sm:grid-cols-[104px_minmax(0,1fr)_auto]"
+      className="product-card-shell relative z-0 grid gap-3 overflow-visible rounded-[1.35rem] border border-slate-200 bg-white p-3 pb-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-[#28344C] dark:bg-[#151D30] sm:grid-cols-[104px_minmax(0,1fr)_auto]"
       style={{ borderColor: isBookmarked ? accentColor : undefined }}
     >
-      <div className="absolute inset-x-0 bottom-0 h-1.5" style={{ backgroundColor: accentColor }} />
+      <div className="product-card-accent" style={{ backgroundColor: accentColor }} />
       {onBulkToggle && (
         <label className="absolute left-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-2xl bg-white/95 shadow-sm backdrop-blur dark:bg-[#151D30]/90">
           <input className="h-4 w-4 accent-sky-600" type="checkbox" checked={bulkSelected} onChange={onBulkToggle} aria-label={t(language, 'bulkActions')} />
@@ -167,10 +167,10 @@ export function ProductImageCard({
 
   return (
     <article
-      className="relative overflow-visible rounded-[1.35rem] border border-slate-200 bg-white pb-1.5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-[#28344C] dark:bg-[#151D30]"
+      className="product-card-shell relative z-0 overflow-visible rounded-[1.35rem] border border-slate-200 bg-white pb-1.5 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-lg dark:border-[#28344C] dark:bg-[#151D30]"
       style={{ borderColor: isBookmarked ? accentColor : undefined }}
     >
-      <div className="absolute inset-x-0 bottom-0 h-1.5" style={{ backgroundColor: accentColor }} />
+      <div className="product-card-accent" style={{ backgroundColor: accentColor }} />
       <div className="relative aspect-[4/3] w-full bg-slate-100 dark:bg-[#151D30]">
         {onBulkToggle && (
           <label className="absolute left-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-2xl bg-white/95 shadow-sm backdrop-blur dark:bg-[#151D30]/90">

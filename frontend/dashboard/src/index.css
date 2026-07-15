@@ -188,6 +188,30 @@ select {
   background: var(--surface-primary);
 }
 
+.product-card-shell {
+  isolation: auto;
+}
+
+.product-card-shell:focus-within,
+.product-card-shell:has(.product-actions-menu[open]) {
+  z-index: 80;
+}
+
+.product-card-accent {
+  pointer-events: none;
+  position: absolute;
+  right: 1rem;
+  bottom: 0.25rem;
+  left: 1rem;
+  height: 0.35rem;
+  border-radius: 9999px;
+  opacity: 0.9;
+}
+
+.dark .product-card-accent {
+  opacity: 0.82;
+}
+
 .nav-item {
   @apply flex min-h-11 w-full items-center gap-3 rounded-2xl px-3 text-left text-sm font-semibold transition duration-200;
   color: var(--text-secondary);

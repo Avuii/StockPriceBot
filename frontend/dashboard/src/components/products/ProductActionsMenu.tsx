@@ -25,11 +25,11 @@ export function ProductActionsMenu({
   onDelete
 }: ProductActionsMenuProps) {
   return (
-    <details className="group relative">
+    <details className="product-actions-menu group relative z-20">
       <summary className="actions-summary icon-button cursor-pointer" title={t(language, 'actions')}>
         <MoreHorizontal className="h-4 w-4" />
       </summary>
-      <div className="absolute right-0 z-40 mt-2 grid w-60 gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-panel dark:border-[#28344C] dark:bg-[#151D30]">
+      <div className="absolute right-0 top-full z-[120] mt-2 grid w-60 gap-1 rounded-2xl border border-slate-200 bg-white p-2 shadow-panel dark:border-[#28344C] dark:bg-[#151D30]">
         <button className="menu-action" type="button" onClick={onPreview}>
           <Eye className="h-4 w-4" />
           {t(language, 'quickPreview')}
