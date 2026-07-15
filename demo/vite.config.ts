@@ -8,6 +8,9 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig({
   base: process.env.VITE_BASE_PATH ?? '/demo/',
   plugins: [react()],
+  resolve: {
+    dedupe: ['react', 'react-dom']
+  },
   server: {
     port: 5190,
     fs: {

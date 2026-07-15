@@ -35,9 +35,13 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
+      - name: Install shared dashboard dependencies
+        working-directory: frontend/dashboard
+        run: npm ci --no-audit --no-fund
+
       - name: Install demo dependencies
         working-directory: demo
-        run: npm install
+        run: npm install --no-audit --no-fund
 
       - name: Build demo app
         working-directory: demo
