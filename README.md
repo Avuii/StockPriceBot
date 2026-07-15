@@ -80,6 +80,8 @@ The project combines:
 - a **PostgreSQL database** for persistent data and history,
 - and **email notifications** for price and availability events.
 
+---
+
 ### Demo
 
 
@@ -382,10 +384,7 @@ EMAIL_FROM_NAME=StockPriceBot
 EMAIL_ENABLE_SSL=true
 ```
 
-For Gmail, use a **Google App Password** instead of the regular account password. After configuring the alert address in the dashboard, use the **Send test** action to verify delivery.
-
-> [!IMPORTANT]
-> Never commit real credentials or application passwords. Store local secrets in `.env`, and keep that file excluded from version control.
+After configuring the alert address in the dashboard, use the **Send test** action to verify delivery.
 
 ---
 
@@ -569,9 +568,5 @@ This project is licensed under the **MIT License**. See the [`LICENSE`](LICENSE)
 ---
 
 ## Author
+Created by **Katarzyna Stańczyk**
 
-<<<<<<< Updated upstream
-Created by **Katarzyna Stańczyk**
-=======
-Created by **Katarzyna Stańczyk**
->>>>>>> Stashed changes
