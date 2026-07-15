@@ -581,3 +581,6 @@ This project is licensed under the **MIT License**. See the [`LICENSE`](LICENSE)
 
 <<<<<<< Updated upstream
 Created by **Katarzyna Stańczyk**
+=======
+Created by **Katarzyna Stańczyk**
+>>>>>>> Stashed changes
