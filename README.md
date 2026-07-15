@@ -7,36 +7,16 @@
 <p align="center">
   <strong>Product price and availability monitoring with a browser extension, web dashboard, and automated alerts.</strong>
 </p>
-
 <p align="center">
-  <img
-    src="https://img.shields.io/badge/status-active%20development-F59E0B?style=for-the-badge"
-    alt="Status: active development"
-  />
-  <img
-    src="https://img.shields.io/badge/Browser%20Extension-111827?style=for-the-badge&logo=googlechrome&logoColor=white"
-    alt="Browser extension"
-  />
-  <img
-    src="https://img.shields.io/badge/ASP.NET%20Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white"
-    alt="ASP.NET Core"
-  />
-  <img
-    src="https://img.shields.io/badge/React-2563EB?style=for-the-badge&logo=react&logoColor=white"
-    alt="React"
-  />
-  <img
-    src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white"
-    alt="TypeScript"
-  />
-  <img
-    src="https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white"
-    alt="PostgreSQL"
-  />
-  <img
-    src="https://img.shields.io/badge/MIT-22C55E?style=for-the-badge&logo=opensourceinitiative&logoColor=white"
-    alt="MIT License"
-  />
+  <img src="https://img.shields.io/badge/status-active%20development-F59E0B?style=for-the-badge" alt="Status: active development" />
+  <a href="https://avuii.github.io/StockPriceBot/demo/"><img src="https://img.shields.io/badge/Live%20Demo-Open-EC4899?style=for-the-badge&logo=githubpages&logoColor=white" alt="Open StockPriceBot live demo" /></a>
+  <br>
+  <img src="https://img.shields.io/badge/Browser%20Extension-111827?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Browser extension" />
+  <img src="https://img.shields.io/badge/ASP.NET%20Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt="ASP.NET Core" />
+  <img src="https://img.shields.io/badge/React-2563EB?style=for-the-badge&logo=react&logoColor=white" alt="React" />
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/MIT-22C55E?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="MIT License" />
 </p>
 
 ---
@@ -82,8 +62,11 @@ The project combines:
 
 ---
 
-### Demo
+## Demo
 
+A live demo of StockPriceBot is available on GitHub Pages:
+
+[Open Demo](https://avuii.github.io/StockPriceBot/demo/)
 
 ---
 
