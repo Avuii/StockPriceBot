@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="StockPriceBot static product demo for GitHub Pages."
+    />
+    <title>StockPriceBot Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="StockPriceBot home">
+        <img src="../docs/logo.png" alt="" />
+        <span>
+          <strong>StockPriceBot</strong>
+          <small>Smart price tracker</small>
+        </span>
+      </a>
+
+      <nav aria-label="Demo navigation">
+        <a href="#features">Features</a>
+        <a href="#screens">Screens</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#pages">Pages</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero section-shell">
+        <div class="hero-copy">
+          <span class="eyebrow">Deals, price drops, restock alerts</span>
+          <h1>Track products, variants, prices, and stock from one clean dashboard.</h1>
+          <p>
+            StockPriceBot combines a React dashboard, a Chrome extension, a .NET API,
+            PostgreSQL, and a background worker for scheduled price checks.
+          </p>
+
+          <div class="hero-actions">
+            <a class="primary-action" href="#screens">View demo screens</a>
+            <a class="secondary-action" href="../README.md">Read documentation</a>
+          </div>
+
+          <dl class="hero-stats" aria-label="Project highlights">
+            <div>
+              <dt>17</dt>
+              <dd>tracked products</dd>
+            </div>
+            <div>
+              <dt>30.00 zl</dt>
+              <dd>detected savings</dd>
+            </div>
+            <div>
+              <dt>PL/ENG</dt>
+              <dd>localized UI</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="hero-preview" aria-label="Dashboard preview">
+          <img src="../docs/dashboard.png" alt="StockPriceBot dashboard screenshot" />
+        </div>
+      </section>
+
+      <section id="features" class="section-shell">
+        <div class="section-heading">
+          <span class="section-icon">%</span>
+          <div>
+            <h2>What the app covers</h2>
+            <p>Core product-tracking workflows shown as a static portfolio demo.</p>
+          </div>
+        </div>
+
+        <div class="feature-grid">
+          <article>
+            <span class="card-icon">P</span>
+            <h3>Product tracking</h3>
+            <p>Save name, URL, store, image, category, size, color, notes, price, and monitoring status.</p>
+          </article>
+          <article>
+            <span class="card-icon">W</span>
+            <h3>Watchlist</h3>
+            <p>Bookmark selected products and keep them in a dedicated fast-access view.</p>
+          </article>
+          <article>
+            <span class="card-icon">A</span>
+            <h3>Alerts</h3>
+            <p>Receive email alerts for price drops, target price, back-in-stock events, and variant availability.</p>
+          </article>
+          <article>
+            <span class="card-icon">C</span>
+            <h3>Categories</h3>
+            <p>Create categories with custom Lucide icons, colors, counters, and uncategorized product handling.</p>
+          </article>
+          <article>
+            <span class="card-icon">H</span>
+            <h3>Health checks</h3>
+            <p>Inspect monitoring status, selector issues, blocked stores, last successful checks, and logs.</p>
+          </article>
+          <article>
+            <span class="card-icon">E</span>
+            <h3>Extension</h3>
+            <p>Add products from a Chrome popup that reads page data and stores the API token locally.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="screens" class="section-shell gallery-section">
+        <div class="section-heading">
+          <span class="section-icon">S</span>
+          <div>
+            <h2>Screen gallery</h2>
+            <p>Switch between the main application areas.</p>
+          </div>
+        </div>
+
+        <div class="screen-tabs" role="tablist" aria-label="Screenshot tabs">
+          <button class="is-active" type="button" data-screen="dashboard">Dashboard</button>
+          <button type="button" data-screen="products">Products</button>
+          <button type="button" data-screen="watchlist">Watchlist</button>
+          <button type="button" data-screen="categories">Categories</button>
+          <button type="button" data-screen="alerts">Alerts</button>
+          <button type="button" data-screen="statistics">Statistics</button>
+          <button type="button" data-screen="settings">Settings</button>
+          <button type="button" data-screen="dark">Dark mode</button>
+        </div>
+
+        <figure class="screen-view">
+          <img id="screen-image" src="../docs/dashboard.png" alt="Dashboard screenshot" />
+          <figcaption>
+            <strong id="screen-title">Dashboard</strong>
+            <span id="screen-description">Summary cards, opportunities, savings chart, alerts, and categories.</span>
+          </figcaption>
+        </figure>
+      </section>
+
+      <section id="architecture" class="section-shell two-column">
+        <div>
+          <div class="section-heading compact">
+            <span class="section-icon">A</span>
+            <div>
+              <h2>Architecture</h2>
+              <p>Full-stack setup behind the demo.</p>
+            </div>
+          </div>
+
+          <div class="architecture-flow" aria-label="Application architecture">
+            <div>Chrome Extension</div>
+            <span></span>
+            <div>ASP.NET Core API</div>
+            <span></span>
+            <div>PostgreSQL</div>
+            <span></span>
+            <div>Quartz Worker</div>
+            <span></span>
+            <div>Email Alerts</div>
+          </div>
+        </div>
+
+        <div class="tech-card">
+          <h3>Built with</h3>
+          <ul>
+            <li>ASP.NET Core Web API</li>
+            <li>Entity Framework Core and PostgreSQL</li>
+            <li>Quartz.NET scheduled worker</li>
+            <li>React, TypeScript, Vite, TailwindCSS</li>
+            <li>Chrome Extension Manifest V3</li>
+            <li>SignalR live dashboard updates</li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="pages" class="section-shell page-grid-section">
+        <div class="section-heading">
+          <span class="section-icon">G</span>
+          <div>
+            <h2>Product pages</h2>
+            <p>A compact view of the most important dashboard modules.</p>
+          </div>
+        </div>
+
+        <div class="page-grid">
+          <a href="../docs/productswithpanel.png">
+            <img src="../docs/productswithpanel.png" alt="" />
+            <span>Products with side panel</span>
+          </a>
+          <a href="../docs/Categories.png">
+            <img src="../docs/Categories.png" alt="" />
+            <span>Category overview</span>
+          </a>
+          <a href="../docs/Statistics.png">
+            <img src="../docs/Statistics.png" alt="" />
+            <span>Statistics and savings</span>
+          </a>
+          <a href="../docs/settings2.png">
+            <img src="../docs/settings2.png" alt="" />
+            <span>Alert settings</span>
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>StockPriceBot demo</span>
+      <a href="../README.md">Documentation</a>
+    </footer>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
