@@ -579,4 +579,5 @@ This project is licensed under the **MIT License**. See the [`LICENSE`](LICENSE)
 
 ## Author
 
+<<<<<<< Updated upstream
 Created by **Katarzyna Stańczyk**
