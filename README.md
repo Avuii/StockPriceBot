@@ -60,13 +60,21 @@ The project combines:
 - a **PostgreSQL database** for persistent data and history,
 - and **email notifications** for price and availability events.
 
----
-
-## Demo
-
-A live demo of StockPriceBot is available on GitHub Pages:
+### Live Demo
 
 [Open Demo](https://avuii.github.io/StockPriceBot/demo/)
+
+The repository contains a separate GitHub Pages demo application in [`demo/`](demo/).
+
+The production dashboard lives in `frontend/dashboard` and continues to use the real .NET API. The demo app is separate: it renders the same dashboard UI with shared React components, but uses its own mock API and mock product data. It does not require the backend, PostgreSQL, worker, or browser extension.
+
+After GitHub Pages is set to **GitHub Actions**, the demo is published at:
+
+```text
+https://<your-username>.github.io/StockPriceBot/demo/
+```
+
+Publishing instructions are available in [`demo/README.md`](demo/README.md), and the deployment workflow lives in [`.github/workflows/github-pages.yml`](.github/workflows/github-pages.yml).
 
 ---
 
@@ -262,7 +270,7 @@ StockPriceBot/
 │           ├── background.ts               # Background service worker
 │           └── content.ts                  # Product-page data extraction
 │
-├── demo/                                   # Static GitHub Pages preview
+├── demo/                                   # Separate interactive GitHub Pages demo app
 ├── docs/                                   # Logo and interface screenshots
 ├── docker-compose.yml                      # PostgreSQL, API, and worker services
 ├── .env.example                            # Local environment template
@@ -367,7 +375,10 @@ EMAIL_FROM_NAME=StockPriceBot
 EMAIL_ENABLE_SSL=true
 ```
 
-After configuring the alert address in the dashboard, use the **Send test** action to verify delivery.
+For Gmail, use a **Google App Password** instead of the regular account password. After configuring the alert address in the dashboard, use the **Send test** action to verify delivery.
+
+> [!IMPORTANT]
+> Never commit real credentials or application passwords. Store local secrets in `.env`, and keep that file excluded from version control.
 
 ---
 
@@ -468,6 +479,29 @@ dotnet test
 npm --prefix frontend/dashboard run build
 ```
 
+### Demo App Build
+
+PowerShell:
+
+```powershell
+Set-Location demo
+npm install
+$env:VITE_API_URL='demo://mock-api'
+$env:VITE_BASE_PATH='/StockPriceBot/demo/'
+npm run build
+Remove-Item Env:VITE_API_URL
+Remove-Item Env:VITE_BASE_PATH
+Set-Location ..
+```
+
+Bash:
+
+```bash
+cd demo
+npm install
+VITE_API_URL=demo://mock-api VITE_BASE_PATH=/StockPriceBot/demo/ npm run build
+```
+
 ### Extension Production Build
 
 ```bash
@@ -551,5 +585,5 @@ This project is licensed under the **MIT License**. See the [`LICENSE`](LICENSE)
 ---
 
 ## Author
-Created by **Katarzyna Stańczyk**
 
+Created by **Katarzyna Stańczyk**
