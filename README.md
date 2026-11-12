@@ -60,21 +60,17 @@ The project combines:
 - a **PostgreSQL database** for persistent data and history,
 - and **email notifications** for price and availability events.
 
-### Live Demo
+## Live Demo
+<p align="center">
+  <a href="https://avuii.github.io/StockPriceBot/demo/">
+    <strong>Open Demo</strong>
+  </a>
+</p>
 
-[Open Demo](https://avuii.github.io/StockPriceBot/demo/)
 
 The repository contains a separate GitHub Pages demo application in [`demo/`](demo/).
 
 The production dashboard lives in `frontend/dashboard` and continues to use the real .NET API. The demo app is separate: it renders the same dashboard UI with shared React components, but uses its own mock API and mock product data. It does not require the backend, PostgreSQL, worker, or browser extension.
-
-After GitHub Pages is set to **GitHub Actions**, the demo is published at:
-
-```text
-https://<your-username>.github.io/StockPriceBot/demo/
-```
-
-Publishing instructions are available in [`demo/README.md`](demo/README.md), and the deployment workflow lives in [`.github/workflows/github-pages.yml`](.github/workflows/github-pages.yml).
 
 ---
 
@@ -377,8 +373,6 @@ EMAIL_ENABLE_SSL=true
 
 For Gmail, use a **Google App Password** instead of the regular account password. After configuring the alert address in the dashboard, use the **Send test** action to verify delivery.
 
-> [!IMPORTANT]
-> Never commit real credentials or application passwords. Store local secrets in `.env`, and keep that file excluded from version control.
 
 ---
 
@@ -586,4 +580,5 @@ This project is licensed under the **MIT License**. See the [`LICENSE`](LICENSE)
 
 ## Author
 
-Created by **Katarzyna Stańczyk**
+Created by **[Avuii](https://github.com/Avuii)**
+
