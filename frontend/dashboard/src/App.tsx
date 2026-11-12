@@ -92,7 +92,7 @@ import type {
 } from './types';
 
 type Props = {
-  connection: HubConnection;
+  connection: Pick<HubConnection, 'on' | 'off'>;
   apiClient?: ApiClient;
   autoSignIn?: boolean;
 };
