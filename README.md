@@ -5,580 +5,467 @@
 <h1 align="center">StockPriceBot</h1>
 
 <p align="center">
-  <strong>Product price and availability monitoring with a browser extension, web dashboard, and automated alerts.</strong>
+  <strong>Track product prices and availability, manage your watchlist, and get notified when an offer matches your goals.</strong>
 </p>
+
 <p align="center">
-  <img src="https://img.shields.io/badge/status-active%20development-F59E0B?style=for-the-badge" alt="Status: active development" />
-  <a href="https://avuii.github.io/StockPriceBot/demo/"><img src="https://img.shields.io/badge/Live%20Demo-Open-EC4899?style=for-the-badge&logo=githubpages&logoColor=white" alt="Open StockPriceBot live demo" /></a>
-  <br>
-  <img src="https://img.shields.io/badge/Browser%20Extension-111827?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Browser extension" />
-  <img src="https://img.shields.io/badge/ASP.NET%20Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt="ASP.NET Core" />
-  <img src="https://img.shields.io/badge/React-2563EB?style=for-the-badge&logo=react&logoColor=white" alt="React" />
+  <a href="https://avuii.github.io/StockPriceBot/demo/">
+    <img src="https://img.shields.io/badge/Live%20Demo-Open-EC4899?style=for-the-badge&logo=githubpages&logoColor=white" alt="Open the live demo" />
+  </a>
+  <img src="https://img.shields.io/badge/Status-Active%20Development-F59E0B?style=for-the-badge" alt="Status: Active development" />
+  <a href="LICENSE">
+    <img src="https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge" alt="MIT License" />
+  </a>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React-149ECA?style=for-the-badge&logo=react&logoColor=white" alt="React" />
   <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/ASP.NET%20Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white" alt="ASP.NET Core" />
   <img src="https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
-  <img src="https://img.shields.io/badge/MIT-22C55E?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="MIT License" />
+  <img src="https://img.shields.io/badge/Chrome%20Extension-111827?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Chrome Extension" />
+</p>
+
+<p align="center">
+  <a href="https://avuii.github.io/StockPriceBot/demo/"><strong>Live Demo</strong></a> ·
+  <a href="#getting-started"><strong>Getting Started</strong></a> ·
+  <a href="https://github.com/Avuii/StockPriceBot/issues"><strong>Report an Issue</strong></a>
 </p>
 
 ---
+
+## Application Preview
+
+<p align="center">
+  <a href="docs/dashboard.png">
+    <img src="docs/dashboard.png" alt="StockPriceBot dashboard showing tracked products, price changes, and monitoring statistics" width="70%" />
+  </a>
+</p>
+
+---
+
+<p align="center">
+
+| Product Management | Price Alerts |
+|:---:|:---:|
+| [<img src="docs/productswithpanel.png" alt="Product management with category panel" width="380" />](docs/productswithpanel.png) | [<img src="docs/alerts.png" alt="Price and availability alert management" width="380" />](docs/alerts.png) |
+
+| Categories | Statistics |
+|:---:|:---:|
+| [<img src="docs/Categories.png" alt="Custom product categories" width="380" />](docs/Categories.png) | [<img src="docs/Statistics.png" alt="Product price and savings statistics" width="380" />](docs/Statistics.png) |
+
+</p>
+
+<details>
+<summary><strong>More screenshots — watchlist, settings, and dark mode</strong></summary>
+
+| Watchlist | Settings |
+|:---:|:---:|
+| [<img src="docs/watchlist.png" alt="Priority product watchlist" width="380" />](docs/watchlist.png) | [<img src="docs/settings.png" alt="Account and monitoring settings" width="380" />](docs/settings.png) |
+
+| Dashboard Details | Products Without Category Panel |
+|:---:|:---:|
+| [<img src="docs/dashboard2.png" alt="Dashboard details" width="380" />](docs/dashboard2.png) | [<img src="docs/productswithoutpanel.png" alt="Expanded product list" width="380" />](docs/productswithoutpanel.png) |
+
+| Category Management | Products by Category |
+|:---:|:---:|
+| [<img src="docs/Categories2.png" alt="Category editing" width="380" />](docs/Categories2.png) | [<img src="docs/Categories3.png" alt="Products grouped by category" width="380" />](docs/Categories3.png) |
+
+| Statistics Details | Alert Settings |
+|:---:|:---:|
+| [<img src="docs/Statistics2.png" alt="Detailed monitoring statistics" width="380" />](docs/Statistics2.png) | [<img src="docs/settings2.png" alt="Notification preferences" width="380" />](docs/settings2.png) |
+
+| Sign In | Dark Dashboard |
+|:---:|:---:|
+| [<img src="docs/loginpanel.png" alt="Sign-in screen" width="380" />](docs/loginpanel.png) | [<img src="docs/dark.png" alt="Dashboard in dark mode" width="380" />](docs/dark.png) |
+
+| Dark Product View | Dark Statistics |
+|:---:|:---:|
+| [<img src="docs/dark2.png" alt="Products in dark mode" width="380" />](docs/dark2.png) | [<img src="docs/dark3.png" alt="Statistics in dark mode" width="380" />](docs/dark3.png) |
+
+
+<p align="center">
+  <a href="docs/dark4.png"><img src="docs/dark4.png" alt="Sign-in screen in dark mode" width="54%" /></a>
+</p>
+
+</details>
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Key Features](#key-features)
-- [Interface Preview](#interface-preview)
+- [Technology Stack](#technology-stack)
 - [Architecture](#architecture)
-- [How It Works](#how-it-works)
-- [Tech Stack](#tech-stack)
-- [Repository Structure](#repository-structure)
 - [Getting Started](#getting-started)
-- [Email Configuration](#email-configuration)
-- [Product Data Extraction](#product-data-extraction)
-- [Alerts](#alerts)
-- [API Overview](#api-overview)
-- [Testing and Build](#testing-and-build)
-- [Privacy and Transparency](#privacy-and-transparency)
-- [Known Limitations](#known-limitations)
-- [Roadmap](#roadmap)
-- [Project Status](#project-status)
+- [Configuration & API](#configuration--api)
+- [Testing & Security](#testing--security)
+- [Project Status & Roadmap](#project-status--roadmap)
 - [License](#license)
 - [Author](#author)
 
----
-
 ## Overview
 
-**StockPriceBot** is a full-stack application for tracking product prices, availability, and selected variants across online stores.
+**StockPriceBot** is a full-stack price and stock monitoring application for products sold by online stores. It helps users follow price changes, monitor selected sizes or colors, and act on price drops or restocks without repeatedly checking product pages.
 
-Users can add a product manually from the dashboard or capture it directly from the currently opened product page with the Chrome extension. The system then checks the product at scheduled intervals, stores its history, evaluates alert rules, and sends an email when a relevant change occurs.
+Users can add products directly from the React dashboard or capture details from an open store page using the Chrome extension. An ASP.NET Core API manages accounts and tracked products, while a Quartz.NET worker performs scheduled checks, stores monitoring history, and evaluates notification rules. The dashboard displays product status, price history, and statistics, with live updates through SignalR.
 
-The project combines:
+## Demo
 
-- a **React dashboard** for managing products, categories, alerts, and account settings,
-- a **Chrome extension** for collecting product data from store pages,
-- an **ASP.NET Core API** for authentication and application operations,
-- a **Quartz.NET worker** for scheduled monitoring,
-- a **PostgreSQL database** for persistent data and history,
-- and **email notifications** for price and availability events.
+The [interactive GitHub Pages demo](https://avuii.github.io/StockPriceBot/demo/) uses shared dashboard components, sample products, and a mock API. It can be explored without registering or running the backend.
 
-## Live Demo
 <p align="center">
-  <a href="https://avuii.github.io/StockPriceBot/demo/">
-    <strong>Open Demo</strong>
-  </a>
+  <a href="https://avuii.github.io/StockPriceBot/demo/"><strong>Open StockPriceBot Demo →</strong></a>
 </p>
 
+> [!IMPORTANT]
+> The public demo does **not** monitor real stores, run scheduled jobs, persist data in PostgreSQL, or send email alerts. These capabilities belong to the full application.
 
-The repository contains a separate GitHub Pages demo application in [`demo/`](demo/).
-
-The production dashboard lives in `frontend/dashboard` and continues to use the real .NET API. The demo app is separate: it renders the same dashboard UI with shared React components, but uses its own mock API and mock product data. It does not require the backend, PostgreSQL, worker, or browser extension.
-
----
 
 ## Key Features
 
-### Product Monitoring
+| Feature | Description |
+|---|---|
+| **Product Tracking** | Save products with URL, store, image, current and target prices, notes, category, and selected variants. |
+| **Browser Extension** | Capture product information from store pages or manually select the price element. |
+| **Scheduled Monitoring** | Run periodic checks and keep price, availability, and monitoring history. |
+| **Price & Stock Alerts** | Detect target prices, percentage drops, restocks, and selected variant availability. |
+| **Watchlist & Categories** | Prioritize products and organize them using custom categories, colors, and icons. |
+| **Search & Bulk Operations** | Filter, sort, and manage multiple tracked products; import wishlists and export CSV files. |
+| **Analytics** | Explore price charts, recent alerts, potential savings, and monitoring statistics. |
+| **Personalization** | Responsive dashboard, light/dark themes, and Polish/English interface. |
 
-- Add products from the dashboard or browser extension.
-- Track product URL, store, image, category, current price, and target price.
-- Save product variants such as size and color.
-- Add personal notes and enable or pause monitoring.
-- Store price, availability, alert, and monitoring history.
-- Display product health states such as successful check, selector issue, blocked store, or unreadable page.
+The extraction pipeline first looks for structured product data (JSON-LD and `schema.org/Product`), then metadata, detected or saved CSS selectors, and finally a user-selected price element. When a page cannot be read reliably, monitoring records an error rather than silently accepting an unchanged price.
 
-### Organization and Discovery
+Alerts can be configured with target prices, percentage thresholds, restock conditions, selected variants, daily email limits, and digest preferences.
 
-- Create custom categories with Lucide icons and colors.
-- Use list or image-based product views.
-- Search, filter, and sort tracked products.
-- Perform bulk actions.
-- Maintain a separate watchlist for high-priority products.
-- Import wishlist data and export products to CSV.
+## Technology Stack
 
-### Alerts and Insights
-
-- Receive alerts when a product reaches its target price.
-- Receive notifications after a configured percentage price drop.
-- Detect back-in-stock events.
-- Monitor selected size and color variants.
-- Review recent alerts, price history, savings, statistics, and top opportunities.
-- Configure anti-spam rules and daily notification limits.
-
-### User Experience
-
-- Responsive React dashboard.
-- Light and dark themes with a consistent visual identity.
-- Polish and English interface support.
-- Clear privacy information about data read by the browser extension.
-
----
-
-## Interface Preview
-
-The images below are compact previews. Full-size screenshots are available in the [`docs/`](docs/) directory.
-
-| Dashboard | Product Management |
-| --- | --- |
-| <img src="docs/dashboard.png" alt="StockPriceBot dashboard" width="380" /> | <img src="docs/productswithpanel.png" alt="Tracked products with category panel" width="380" /> |
-
-| Categories | Alerts |
-| --- | --- |
-| <img src="docs/Categories.png" alt="Product categories" width="380" /> | <img src="docs/alerts.png" alt="Price and availability alerts" width="380" /> |
-
-| Statistics | Settings |
-| --- | --- |
-| <img src="docs/Statistics.png" alt="Product monitoring statistics" width="380" /> | <img src="docs/settings.png" alt="Account and application settings" width="380" /> |
-
-<details>
-<summary><strong>Show additional screenshots</strong></summary>
-
-<br />
-
-| Dashboard Details | Products Without Panel |
-| --- | --- |
-| <img src="docs/dashboard2.png" alt="Dashboard details" width="380" /> | <img src="docs/productswithoutpanel.png" alt="Products without category panel" width="380" /> |
-
-| Watchlist | Category Management |
-| --- | --- |
-| <img src="docs/watchlist.png" alt="Product watchlist" width="380" /> | <img src="docs/Categories2.png" alt="Category management" width="380" /> |
-
-| Products by Category | Statistics Details |
-| --- | --- |
-| <img src="docs/Categories3.png" alt="Products grouped by category" width="380" /> | <img src="docs/Statistics2.png" alt="Detailed monitoring statistics" width="380" /> |
-
-| Alert Settings | Login |
-| --- | --- |
-| <img src="docs/settings2.png" alt="Alert settings" width="380" /> | <img src="docs/loginpanel.png" alt="Login panel" width="380" /> |
-
-| Dark Dashboard | Dark Product View |
-| --- | --- |
-| <img src="docs/dark.png" alt="Dashboard in dark theme" width="380" /> | <img src="docs/dark2.png" alt="Product view in dark theme" width="380" /> |
-
-| Dark Statistics | Dark Login |
-| --- | --- |
-| <img src="docs/dark3.png" alt="Statistics in dark theme" width="380" /> | <img src="docs/dark4.png" alt="Login panel in dark theme" width="380" /> |
-
-</details>
-
----
+| Layer | Technologies |
+|---|---|
+| **Frontend** | React 19, TypeScript, Vite, Tailwind CSS |
+| **UI & Charts** | Recharts, Lucide React |
+| **Backend** | C#, ASP.NET Core 8 Web API, Entity Framework Core |
+| **Database** | PostgreSQL |
+| **Background Processing** | Quartz.NET |
+| **Real-Time Communication** | SignalR |
+| **Browser Extension** | Chrome Manifest V3, React, TypeScript, content scripts, service worker |
+| **Notifications** | SMTP email |
+| **Infrastructure** | Docker Compose |
+| **Demo** | React with a mock API and sample product data |
 
 ## Architecture
 
+The full application separates the dashboard, browser extension, API, persistent storage, and monitoring worker. The public demo follows a separate mock-data path.
+
 ```mermaid
 flowchart LR
-    Extension["Chrome Extension"] --> API["ASP.NET Core API"]
-    Dashboard["React Dashboard"] <--> API
-    API <--> DB[("PostgreSQL")]
-    Worker["Quartz.NET Worker"] <--> DB
-    Worker --> Stores["Product Pages"]
-    Worker --> Mail["Email Notifications"]
-    API --> Hub["SignalR Hub"]
+    Extension[Chrome Extension] --> API[ASP.NET Core API]
+    Dashboard[React Dashboard] <--> API
+    API <--> DB[(PostgreSQL)]
+    Worker[Quartz.NET Worker] <--> DB
+    Worker --> Stores[Online Store Pages]
+    Worker --> Mail[SMTP Email]
+    API --> Hub[SignalR Hub]
     Hub --> Dashboard
+    Demo[GitHub Pages Demo] --> Mock[Mock API and Sample Data]
 ```
 
-### Component Responsibilities
+### Monitoring Flow
 
-| Component | Responsibility |
-| --- | --- |
-| Chrome Extension | Reads product data from the current page and sends it to the API. |
-| React Dashboard | Manages products, categories, settings, history, alerts, and statistics. |
-| ASP.NET Core API | Handles authentication, application operations, validation, and dashboard data. |
-| Quartz.NET Worker | Runs scheduled checks, evaluates alert rules, and creates monitoring records. |
-| PostgreSQL | Stores accounts, products, categories, histories, settings, and alert logs. |
-| SignalR | Delivers live price and status updates to the dashboard. |
-| SMTP Service | Sends price and availability notifications by email. |
+```mermaid
+flowchart TD
+    A[Add or capture a product] --> B[Save product and alert settings]
+    B --> C[Scheduled monitoring check]
+    C --> D{Page data readable?}
+    D -- Yes --> E[Update price and availability history]
+    D -- No --> F[Record monitoring error]
+    E --> G{Alert condition met?}
+    G -- Yes --> H[Record alert and notify user]
+    G -- No --> I[Next scheduled check]
+    H --> I
+    F --> I
+```
 
----
-
-## How It Works
-
-1. The user opens a product page in a supported browser.
-2. The Chrome extension detects the product name, price, image, store, availability, and visible variant information.
-3. The user reviews the detected data, sets alert rules, and saves the product.
-4. The API validates and stores the product in PostgreSQL.
-5. The worker checks active products according to their configured refresh intervals.
-6. Each successful check can update price history, availability history, and monitoring logs.
-7. When an alert condition is met, the system records the event and sends an email notification.
-8. The dashboard displays the latest product state and receives live updates through SignalR.
-
----
-
-## Tech Stack
-
-### Backend
-
-- ASP.NET Core Web API
-- Entity Framework Core
-- PostgreSQL
-- Quartz.NET
-- SignalR
-- PBKDF2 password hashing
-- SMTP email notifications
-- Docker Compose
-
-### Dashboard
-
-- React 19
-- TypeScript
-- Vite
-- Tailwind CSS
-- Recharts
-- Lucide React
-- SignalR client
-
-### Browser Extension
-
-- Chrome Extension Manifest V3
-- React
-- TypeScript
-- Content scripts
-- Background service worker
-- `chrome.storage` for local extension settings and token storage
-
----
-
-## Repository Structure
+### Repository Structure
 
 ```text
 StockPriceBot/
 ├── backend/
 │   ├── src/
-│   │   ├── PriceStockBot.Api/              # HTTP endpoints, auth, SignalR, configuration
-│   │   ├── PriceStockBot.Core/             # Domain models, alert rules, and ports
-│   │   ├── PriceStockBot.Infrastructure/   # EF Core, extraction, email, services
-│   │   └── PriceStockBot.Worker/           # Quartz.NET scheduled monitoring jobs
-│   └── tests/
-│       └── PriceStockBot.Tests/            # Parser and alert-rule tests
-│
+│   │   ├── PriceStockBot.Api/               # REST API, auth, SignalR
+│   │   ├── PriceStockBot.Core/              # Domain models and alert rules
+│   │   ├── PriceStockBot.Infrastructure/    # Persistence, extraction, email
+│   │   └── PriceStockBot.Worker/            # Quartz.NET monitoring jobs
+│   └── tests/PriceStockBot.Tests/           # Backend tests
 ├── frontend/
-│   ├── dashboard/
-│   │   └── src/
-│   │       ├── app/                        # App-level types and view helpers
-│   │       └── components/
-│   │           ├── categories/             # Category management
-│   │           ├── charts/                 # Price and savings charts
-│   │           ├── common/                 # Shared UI controls
-│   │           ├── layout/                 # Navigation and application shell
-│   │           ├── products/               # Cards, forms, filters, and details
-│   │           └── settings/               # Account and notification settings
-│   └── extension/
-│       └── src/
-│           ├── popup/                      # Extension popup interface
-│           ├── background.ts               # Background service worker
-│           └── content.ts                  # Product-page data extraction
-│
-├── demo/                                   # Separate interactive GitHub Pages demo app
-├── docs/                                   # Logo and interface screenshots
-├── docker-compose.yml                      # PostgreSQL, API, and worker services
-├── .env.example                            # Local environment template
+│   ├── dashboard/                           # React dashboard
+│   └── extension/                           # Browser extension
+├── demo/                                    # Independent GitHub Pages demo
+├── docs/                                    # Logo and screenshots
+├── .github/workflows/                       # Automation workflows
+├── docker-compose.yml                       # Local services
+├── .env.example                             # Example environment variables
+├── .gitignore
 ├── LICENSE
 └── README.md
 ```
 
----
-
 ## Getting Started
 
-### Requirements
+### Prerequisites
 
-- Docker Desktop with the Linux engine enabled
-- .NET SDK 8
-- Node.js 20 or newer
-- Chrome or another Chromium-based browser
+- Docker Desktop with Linux containers enabled.
+- .NET SDK 8 for backend builds and tests.
+- Node.js 20 or newer and npm.
+- Chrome or another Chromium-based browser for the extension.
 
-### 1. Create the Local Environment File
+### Installation
 
-PowerShell:
+1. Clone the repository:
 
-```powershell
-Copy-Item .env.example .env
-```
+   ```bash
+   git clone https://github.com/Avuii/StockPriceBot.git
+   cd StockPriceBot
+   ```
 
-Bash:
+2. Create the local environment configuration:
 
-```bash
-cp .env.example .env
-```
+   **PowerShell**
+   ```powershell
+   Copy-Item .env.example .env
+   ```
 
-The default PostgreSQL values can be used for local development. SMTP variables are required only when testing email delivery.
+   **Bash**
+   ```bash
+   cp .env.example .env
+   ```
 
-### 2. Start the API, Worker, and Database
+3. Start PostgreSQL, the API, and the monitoring worker:
 
-```bash
-docker compose up --build
-```
+   ```bash
+   docker compose up --build -d
+   ```
 
-Default local services:
+4. Install dependencies and start the React dashboard:
 
-| Service | Address |
-| --- | --- |
+   ```bash
+   npm install --prefix frontend/dashboard
+   npm run dev --prefix frontend/dashboard
+   ```
+
+5. Build the Chrome extension:
+
+   ```bash
+   npm install --prefix frontend/extension
+   npm run build --prefix frontend/extension
+   ```
+
+   Open `chrome://extensions`, enable **Developer mode**, select **Load unpacked**, and choose `frontend/extension/dist`. Configure the API token from the dashboard settings if it has not synchronized automatically.
+
+| Service | Default local address |
+|---|---|
+| Dashboard | `http://localhost:5187` |
 | API | `http://localhost:5080` |
 | PostgreSQL | `localhost:5432` |
 
-EF Core migrations are applied automatically when the API and worker start.
+The local API and worker apply EF Core migrations when they start in the documented development setup.
 
 > [!TIP]
-> If Docker reports a `dockerDesktopLinuxEngine` pipe error, open Docker Desktop and wait until the Linux engine is ready before running the command again.
+> If Docker reports a `dockerDesktopLinuxEngine` pipe error, start Docker Desktop and make sure the Linux engine is running before retrying.
 
-### 3. Start the Dashboard
+### Run the Demo Locally
 
-```bash
-npm --prefix frontend/dashboard install
-npm --prefix frontend/dashboard run dev
-```
-
-The default dashboard address is:
-
-```text
-http://localhost:5187
-```
-
-If the port is already in use, update the development script in `frontend/dashboard/package.json`.
-
-### 4. Build and Load the Chrome Extension
+The interactive demo does not require Docker, PostgreSQL, or the extension:
 
 ```bash
-npm --prefix frontend/extension install
-npm --prefix frontend/extension run build
+npm install --prefix demo
+npm run dev --prefix demo
 ```
 
-Then:
+Open the address shown by Vite in the terminal.
 
-1. Open `chrome://extensions`.
-2. Enable **Developer mode**.
-3. Select **Load unpacked**.
-4. Choose `frontend/extension/dist`.
-5. Open the dashboard settings and copy the API token.
-6. Paste the token into the extension if it was not synchronized automatically.
+## Configuration & API
 
-The extension attempts to detect the product name, price, image, URL, store, availability, size, color, and category suggestion. When automatic price detection fails, the user can select the price element manually.
+### Environment Variables
 
----
+The root `.env` file contains local configuration for the application. SMTP credentials are only required to test or use real email notifications.
 
-## Email Configuration
+| Variable | Purpose |
+|---|---|
+| `EMAIL_ENABLED` | Enable or disable email delivery |
+| `EMAIL_SMTP_HOST` | SMTP server hostname |
+| `EMAIL_SMTP_PORT` | SMTP server port |
+| `EMAIL_USERNAME` | SMTP account username |
+| `EMAIL_PASSWORD` | SMTP password or provider-specific app password |
+| `EMAIL_FROM` | Sender email address |
+| `EMAIL_FROM_NAME` | Sender display name |
+| `EMAIL_ENABLE_SSL` | Enable secure SMTP connection settings |
 
-The sender account is configured at application level. Individual users only provide the recipient address for alerts in the dashboard.
-
-Example Gmail SMTP configuration:
+Example SMTP configuration:
 
 ```dotenv
 EMAIL_ENABLED=true
 EMAIL_SMTP_HOST=smtp.gmail.com
 EMAIL_SMTP_PORT=587
-EMAIL_USERNAME=stockpricebotalert@gmail.com
-EMAIL_PASSWORD=google-app-password
-EMAIL_FROM=stockpricebotalert@gmail.com
+EMAIL_USERNAME=your-sender@example.com
+EMAIL_PASSWORD=your-app-password
+EMAIL_FROM=your-sender@example.com
 EMAIL_FROM_NAME=StockPriceBot
 EMAIL_ENABLE_SSL=true
 ```
 
-For Gmail, use a **Google App Password** instead of the regular account password. After configuring the alert address in the dashboard, use the **Send test** action to verify delivery.
+The SMTP sender is configured at application level. Users configure a recipient address in the dashboard and can verify delivery with **Send test**.
 
+> [!IMPORTANT]
+> Keep `.env` and all real credentials out of version control. The committed `.env.example` must contain only placeholders or non-sensitive defaults. Do not expose tokens or SMTP credentials in frontend code.
 
----
+### API Reference
 
-## Product Data Extraction
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `POST` | `/api/auth/register` | Register an account |
+| `POST` | `/api/auth/login` | Sign in |
+| `POST` | `/api/auth/forgot-password` | Request password reset |
+| `POST` | `/api/auth/reset-password` | Reset a password |
+| `GET` | `/api/auth/me` | Retrieve current account |
+| `POST` | `/api/auth/logout` | Sign out |
+| `GET` | `/api/account/settings` | Read account settings |
+| `PATCH` | `/api/account/settings` | Update account settings |
+| `POST` | `/api/account/settings/test-email` | Send a test email |
+| `GET` | `/api/products` | List tracked products |
+| `GET` | `/api/products/{id}` | Retrieve a tracked product |
+| `POST` | `/api/products` | Add a product |
+| `PATCH` | `/api/products/{id}` | Update product details |
+| `DELETE` | `/api/products/{id}` | Delete a product |
+| `GET` | `/api/products/{id}/history` | Retrieve monitoring history |
+| `POST` | `/api/products/{id}/check` | Request a monitoring check |
+| `POST` | `/api/products/preview` | Preview extracted product data |
+| `GET` | `/api/categories` | List categories |
+| `POST` | `/api/categories` | Create a category |
+| `PATCH` | `/api/categories/{id}` | Update a category |
+| `DELETE` | `/api/categories/{id}` | Delete a category |
+| `GET` | `/api/dashboard/stats` | Retrieve dashboard statistics |
 
-Online stores expose product data in different formats, so StockPriceBot uses a layered extraction strategy.
+The SignalR hub is available at `/hubs/price-updates` in the full application. The public demo uses mock data rather than these endpoints.
 
-### Extraction Order
+## Testing & Security
 
-1. JSON-LD and `schema.org/Product` data.
-2. Open Graph and standard metadata.
-3. CSS selectors detected or saved by the browser extension.
-4. A manually selected price element.
-5. A monitoring error state when the page cannot be read reliably.
+### Build and Test Commands
 
-### Monitoring Flow
-
-The worker loads active products that are due for a check according to the refresh interval selected in account settings, such as every 15 minutes, 30 minutes, 1 hour, 3 hours, or once per day.
-
-Each check can update:
-
-- current price,
-- availability,
-- selected variant state,
-- price history,
-- availability history,
-- monitoring status,
-- and the latest readable error message.
-
----
-
-## Alerts
-
-Alerts can be triggered when:
-
-- a product reaches or falls below its target price,
-- the price drops by a configured percentage,
-- an unavailable product returns to stock,
-- a selected size or color becomes available,
-- or the current price is close to the target price.
-
-Available anti-spam controls include:
-
-- minimum discount percentage,
-- maximum emails per product per day,
-- daily digest mode,
-- selected-variant-only alerts,
-- back-in-stock alerts,
-- and below-target alerts.
-
----
-
-## API Overview
-
-```text
-POST   /api/auth/register
-POST   /api/auth/login
-POST   /api/auth/forgot-password
-POST   /api/auth/reset-password
-GET    /api/auth/me
-POST   /api/auth/logout
-
-GET    /api/account/settings
-PATCH  /api/account/settings
-POST   /api/account/settings/test-email
-
-GET    /api/products
-GET    /api/products/{id}
-POST   /api/products
-PATCH  /api/products/{id}
-DELETE /api/products/{id}
-GET    /api/products/{id}/history
-POST   /api/products/{id}/check
-POST   /api/products/preview
-
-GET    /api/categories
-POST   /api/categories
-PATCH  /api/categories/{id}
-DELETE /api/categories/{id}
-
-GET    /api/dashboard/stats
-GET    /hubs/price-updates
-```
-
----
-
-## Testing and Build
-
-### Backend Tests
+Run backend tests from the repository root:
 
 ```bash
+cd backend
 dotnet test
 ```
 
-### Dashboard Production Build
+Build the dashboard, extension, and standalone demo from the repository root:
 
 ```bash
-npm --prefix frontend/dashboard run build
+npm run build --prefix frontend/dashboard
+npm run build --prefix frontend/extension
+npm run build --prefix demo
 ```
 
-### Demo App Build
+To build the GitHub Pages demo with the expected base path:
 
-PowerShell:
-
+**PowerShell**
 ```powershell
 Set-Location demo
-npm install
-$env:VITE_API_URL='demo://mock-api'
-$env:VITE_BASE_PATH='/StockPriceBot/demo/'
+$env:VITE_API_URL = 'demo://mock-api'
+$env:VITE_BASE_PATH = '/StockPriceBot/demo/'
 npm run build
 Remove-Item Env:VITE_API_URL
 Remove-Item Env:VITE_BASE_PATH
 Set-Location ..
 ```
 
-Bash:
-
+**Bash**
 ```bash
 cd demo
-npm install
 VITE_API_URL=demo://mock-api VITE_BASE_PATH=/StockPriceBot/demo/ npm run build
+cd ..
 ```
 
-### Extension Production Build
+### Continuous Integration & Deployment
 
-```bash
-npm --prefix frontend/extension run build
-```
+The [interactive demo](https://avuii.github.io/StockPriceBot/demo/) is published separately on GitHub Pages. The dashboard, backend, worker, database, and browser extension require the full application setup; the demo build alone does not verify those components.
 
----
+The build and test commands above can be used for local verification. Expanded integration and end-to-end testing remains on the roadmap.
 
-## Privacy and Transparency
+### Security & Privacy
 
-The browser extension reads only the data needed to save and monitor a product:
+| Area | Implementation |
+|---|---|
+| Account security | Token-based API authentication and PBKDF2 password hashing |
+| Extension storage | API token saved locally with `chrome.storage` |
+| Product data | Reads product-specific fields such as price, URL, store, image, availability, and visible variants |
+| Store integrity | Does not replace affiliate links, change coupon codes, or modify store content |
+| Credentials | SMTP secrets are provided by local backend configuration |
 
-- product name,
-- current price,
-- product image,
-- product URL,
-- store name,
-- availability,
-- selected size and color when detectable,
-- and a user-selected price selector when manual selection is used.
+> [!NOTE]
+> The extension needs to read product pages to capture product details. It is not designed to collect unrelated browsing content.
 
-The API token is stored locally with `chrome.storage` and is used only for communication with the StockPriceBot backend. The extension does not replace affiliate links, modify coupon codes, or alter store content.
+> [!WARNING]
+> Stores may block automated requests, render prices dynamically, or change HTML selectors. Monitoring errors are recorded when reliable extraction is not possible; price checks are not guaranteed for every website.
 
-Account passwords are stored as secure hashes and are never persisted as plain text.
+## Project Status & Roadmap
 
----
+**Current status: Active development.** The full-stack application has a dashboard, ASP.NET Core API, PostgreSQL storage, Quartz.NET worker, Chrome extension, and configurable email alerts. The separate GitHub Pages demo provides a simulated interface preview.
 
-## Known Limitations
+| Component | Status |
+|---|---|
+| React dashboard | Implemented |
+| ASP.NET Core API and authentication | Implemented |
+| PostgreSQL and scheduled monitoring | Implemented |
+| Chrome extension | Implemented |
+| Email alert flow | Implemented; SMTP configuration required |
+| GitHub Pages demo | Available; simulated data |
+| Automated testing | Backend tests available; additional coverage planned |
+| Full production deployment | Planned |
 
-- Some stores block regular HTTP requests or require anti-bot verification.
-- JavaScript-heavy pages may not expose the final price in the initial HTML response.
-- Product page changes can invalidate previously saved CSS selectors.
-- Variant detection works best when the selected size or color is visible on the page.
-- Email delivery requires valid SMTP configuration.
-- A browser-rendering fallback for difficult pages is planned but is not yet part of the default monitoring pipeline.
+### Implemented
 
-When a page cannot be processed safely, StockPriceBot records a monitoring error instead of silently storing unreliable data.
+- [x] ASP.NET Core API with user accounts and token authentication.
+- [x] PostgreSQL persistence and EF Core migrations.
+- [x] React dashboard with responsive layouts and light/dark themes.
+- [x] Chrome extension for capturing products and selecting price elements.
+- [x] Product records with images, notes, categories, target prices, sizes, and colors.
+- [x] Priority watchlist, sorting, filtering, bulk actions, CSV export, and wishlist import.
+- [x] Scheduled checks using Quartz.NET and real-time dashboard updates through SignalR.
+- [x] Price, availability, alert, and monitoring histories.
+- [x] Price-drop, target-price, restock, and variant alerts with email preferences.
+- [x] Custom categories with Lucide icons and colors.
+- [x] Polish and English dashboard interface.
+- [x] Standalone mock-data demo on GitHub Pages.
+- [x] Backend parser and alert-rule tests.
 
----
+### Planned Improvements
 
-## Roadmap
+- [ ] Add store-specific extraction adapters for popular e-commerce platforms.
+- [ ] Add a Playwright fallback for JavaScript-heavy stores.
+- [ ] Introduce web push notifications.
+- [ ] Improve multi-URL imports and CSV import workflows.
+- [ ] Expand automated integration and end-to-end tests for the dashboard and extension.
+- [ ] Deploy the full dashboard, API, worker, and database to production.
+- [ ] Support cross-store price comparisons.
+- [ ] Add smarter recommendations based on price history.
 
-### Completed
+### Known Limitations
 
-- [x] ASP.NET Core API with user accounts and token authentication
-- [x] PostgreSQL persistence with Entity Framework Core migrations
-- [x] React dashboard with light and dark themes
-- [x] Chrome extension for adding products from store pages
-- [x] Product variants including size, color, category, note, and image
-- [x] Backend-based watchlist
-- [x] Price, availability, monitoring, and alert histories
-- [x] Email alert settings and test email action
-- [x] Category management with custom Lucide icons and colors
-- [x] Search, filtering, sorting, bulk actions, CSV export, and wishlist import
-
-### Planned
-
-- [ ] Store-specific adapters for popular e-commerce platforms
-- [ ] Playwright fallback for JavaScript-heavy pages
-- [ ] Web push notifications
-- [ ] Improved multi-URL and CSV import workflow
-- [ ] End-to-end tests for dashboard and extension flows
-- [ ] Production deployment on a low-cost cloud stack
-- [ ] Cross-store product comparison
-- [ ] Smarter recommendations based on price history
-
----
-
-## Project Status
-
-StockPriceBot is under **active development**.
-
-The core full-stack architecture is in place, including the API, database, worker, dashboard, browser extension, and email notification flow. Current work focuses on improving extraction reliability, store compatibility, automated testing, and production deployment.
-
----
+- Some stores block regular HTTP requests or require anti-bot challenges.
+- Product pages rendered with JavaScript may not expose their final price to the monitor.
+- Site redesigns can invalidate stored CSS selectors.
+- Variant detection requires the selected size or color to be discoverable on the page.
+- Email delivery depends on valid SMTP configuration.
+- The GitHub Pages demo does not perform real monitoring or send notifications.
 
 ## License
 
-This project is licensed under the **MIT License**. See the [`LICENSE`](LICENSE) file for details.
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
 ## Author
 
-Created by **[Avuii](https://github.com/Avuii)**
-
+Created and maintained by **[Avuii](https://github.com/Avuii)**.
