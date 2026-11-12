@@ -1,0 +1,12 @@
+<Solution>
+  <Folder Name="/backend/" />
+  <Folder Name="/backend/src/">
+    <Project Path="backend/src/PriceStockBot.Api/PriceStockBot.Api.csproj" />
+    <Project Path="backend/src/PriceStockBot.Core/PriceStockBot.Core.csproj" />
+    <Project Path="backend/src/PriceStockBot.Infrastructure/PriceStockBot.Infrastructure.csproj" />
+    <Project Path="backend/src/PriceStockBot.Worker/PriceStockBot.Worker.csproj" />
+  </Folder>
+  <Folder Name="/backend/tests/">
+    <Project Path="backend/tests/PriceStockBot.Tests/PriceStockBot.Tests.csproj" />
+  </Folder>
+</Solution>

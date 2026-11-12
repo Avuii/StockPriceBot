@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-pricestockbot}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-pricestockbot}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/src/PriceStockBot.Api/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-pricestockbot};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      Database__ApplyMigrationsOnStartup: "true"
+      Notifications__Telegram__Enabled: ${TELEGRAM_ENABLED:-false}
+      Notifications__Telegram__BotToken: ${TELEGRAM_BOT_TOKEN:-}
+      Notifications__Telegram__ChatId: ${TELEGRAM_CHAT_ID:-}
+      Notifications__Email__Enabled: ${EMAIL_ENABLED:-false}
+      Notifications__Email__SmtpHost: ${EMAIL_SMTP_HOST:-}
+      Notifications__Email__SmtpPort: ${EMAIL_SMTP_PORT:-587}
+      Notifications__Email__UserName: ${EMAIL_USERNAME:-}
+      Notifications__Email__Password: ${EMAIL_PASSWORD:-}
+      Notifications__Email__FromEmail: ${EMAIL_FROM:-}
+      Notifications__Email__FromName: ${EMAIL_FROM_NAME:-PriceStockBot}
+      Notifications__Email__EnableSsl: ${EMAIL_ENABLE_SSL:-true}
+    ports:
+      - "5080:8080"
+
+  worker:
+    build:
+      context: .
+      dockerfile: backend/src/PriceStockBot.Worker/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
+    environment:
+      DOTNET_ENVIRONMENT: Development
+      ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-pricestockbot};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
+      Database__ApplyMigrationsOnStartup: "true"
+      Worker__SchedulerIntervalSeconds: 300
+      Notifications__Telegram__Enabled: ${TELEGRAM_ENABLED:-false}
+      Notifications__Telegram__BotToken: ${TELEGRAM_BOT_TOKEN:-}
+      Notifications__Telegram__ChatId: ${TELEGRAM_CHAT_ID:-}
+      Notifications__Email__Enabled: ${EMAIL_ENABLED:-false}
+      Notifications__Email__SmtpHost: ${EMAIL_SMTP_HOST:-}
+      Notifications__Email__SmtpPort: ${EMAIL_SMTP_PORT:-587}
+      Notifications__Email__UserName: ${EMAIL_USERNAME:-}
+      Notifications__Email__Password: ${EMAIL_PASSWORD:-}
+      Notifications__Email__FromEmail: ${EMAIL_FROM:-}
+      Notifications__Email__FromName: ${EMAIL_FROM_NAME:-PriceStockBot}
+      Notifications__Email__EnableSsl: ${EMAIL_ENABLE_SSL:-true}
+
+volumes:
+  postgres-data:
