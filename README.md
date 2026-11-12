@@ -13,9 +13,7 @@
     <img src="https://img.shields.io/badge/Live%20Demo-Open-EC4899?style=for-the-badge&logo=githubpages&logoColor=white" alt="Open the live demo" />
   </a>
   <img src="https://img.shields.io/badge/Status-Active%20Development-F59E0B?style=for-the-badge" alt="Status: Active development" />
-  <a href="LICENSE">
-    <img src="https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge" alt="MIT License" />
-  </a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-All%20Rights%20Reserved-6B7280?style=for-the-badge" alt="All Rights Reserved" /></a>
 </p>
 
 <p align="center">
@@ -488,9 +486,18 @@ dotnet test PriceStockBot.slnx --no-build
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
+Copyright © 2026 [Avuii](https://github.com/Avuii). All rights reserved.
 
----
+The project's original code, design, and content may not be copied,
+modified, redistributed, or used commercially without prior written
+permission, except where applicable law permits.
+
+Previously released MIT-licensed versions remain covered by their original license.
+
+Third-party materials retain their respective licenses.
+See the [LICENSE](LICENSE) file for details.
+
+
 
 ## Author
 
