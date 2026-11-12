@@ -4,6 +4,7 @@ import { Clock3, Copy, Eye, EyeOff, KeyRound, ListChecks, Mail, Save, Send, Shie
 import { API_BASE_URL } from '../../api';
 import { type Language, t } from '../../i18n';
 import type { AccountSettings, EmailTestResult } from '../../types';
+import { BrowserPushSettings } from './BrowserPushSettings';
 import { CustomSelect } from '../common/CustomSelect';
 import { Field, Toggle } from '../common/ui';
 
@@ -13,6 +14,7 @@ type SettingsViewProps = {
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
   onTestEmail: () => Promise<EmailTestResult>;
   apiToken: string;
+  showBrowserPush?: boolean;
   language: Language;
 };
 
@@ -32,6 +34,7 @@ export function SettingsView({
   onSubmit,
   onTestEmail,
   apiToken,
+  showBrowserPush = true,
   language
 }: SettingsViewProps) {
   const [showToken, setShowToken] = useState(false);
@@ -142,6 +145,8 @@ export function SettingsView({
           </div>
         </Field>
       </section>
+
+      {showBrowserPush && <BrowserPushSettings language={language} />}
 
       <form className="panel space-y-4 p-5" onSubmit={submitSettings}>
         <div>

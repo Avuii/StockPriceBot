@@ -13,4 +13,10 @@ RUN dotnet publish backend/src/PriceStockBot.Worker/PriceStockBot.Worker.csproj 
 FROM mcr.microsoft.com/dotnet/runtime:8.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
+ARG INSTALL_PLAYWRIGHT=false
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN if [ "$INSTALL_PLAYWRIGHT" = "true" ]; then \
+      case "$(uname -m)" in x86_64) arch=x64 ;; aarch64) arch=arm64 ;; *) exit 1 ;; esac && \
+      /app/.playwright/node/linux-$arch/node /app/.playwright/package/cli.js install --with-deps chromium; \
+    fi
 ENTRYPOINT ["dotnet", "PriceStockBot.Worker.dll"]

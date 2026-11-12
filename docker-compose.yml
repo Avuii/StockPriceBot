@@ -19,6 +19,8 @@ services:
     build:
       context: .
       dockerfile: backend/src/PriceStockBot.Api/Dockerfile
+      args:
+        INSTALL_PLAYWRIGHT: ${PLAYWRIGHT_ENABLED:-false}
     depends_on:
       postgres:
         condition: service_healthy
@@ -27,6 +29,10 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-pricestockbot};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
       Database__ApplyMigrationsOnStartup: "true"
+      Scraping__PlaywrightEnabled: ${PLAYWRIGHT_ENABLED:-false}
+      Notifications__WebPush__Subject: ${WEB_PUSH_SUBJECT:-}
+      Notifications__WebPush__PublicKey: ${WEB_PUSH_PUBLIC_KEY:-}
+      Notifications__WebPush__PrivateKey: ${WEB_PUSH_PRIVATE_KEY:-}
       Notifications__Telegram__Enabled: ${TELEGRAM_ENABLED:-false}
       Notifications__Telegram__BotToken: ${TELEGRAM_BOT_TOKEN:-}
       Notifications__Telegram__ChatId: ${TELEGRAM_CHAT_ID:-}
@@ -45,6 +51,8 @@ services:
     build:
       context: .
       dockerfile: backend/src/PriceStockBot.Worker/Dockerfile
+      args:
+        INSTALL_PLAYWRIGHT: ${PLAYWRIGHT_ENABLED:-false}
     depends_on:
       postgres:
         condition: service_healthy
@@ -54,6 +62,10 @@ services:
       DOTNET_ENVIRONMENT: Development
       ConnectionStrings__Postgres: Host=postgres;Port=5432;Database=${POSTGRES_DB:-pricestockbot};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD:-postgres}
       Database__ApplyMigrationsOnStartup: "true"
+      Scraping__PlaywrightEnabled: ${PLAYWRIGHT_ENABLED:-false}
+      Notifications__WebPush__Subject: ${WEB_PUSH_SUBJECT:-}
+      Notifications__WebPush__PublicKey: ${WEB_PUSH_PUBLIC_KEY:-}
+      Notifications__WebPush__PrivateKey: ${WEB_PUSH_PRIVATE_KEY:-}
       Worker__SchedulerIntervalSeconds: 300
       Notifications__Telegram__Enabled: ${TELEGRAM_ENABLED:-false}
       Notifications__Telegram__BotToken: ${TELEGRAM_BOT_TOKEN:-}

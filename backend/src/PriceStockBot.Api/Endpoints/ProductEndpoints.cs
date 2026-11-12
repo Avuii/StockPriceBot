@@ -127,7 +127,7 @@ public static class ProductEndpoints
                 PriceSelector = CleanOptional(request.PriceSelector, MaxSelectorLength),
                 StockSelector = CleanOptional(request.StockSelector, MaxSelectorLength),
                 Category = category,
-                LastCheckedAt = now,
+                LastCheckedAt = request.CurrentPrice is not null ? now : null,
                 MonitoringStatus = request.CurrentPrice is not null ? MonitorHealthStatus.Ok : MonitorHealthStatus.Unknown,
                 LastCheckMessage = request.CurrentPrice is not null ? "Produkt dodany z ceny odczytanej przez wtyczke." : "Produkt dodany bez ceny poczatkowej.",
                 LastCheckSource = request.CurrentPrice is not null ? StoreDetectionSource.ExtensionPayload : StoreDetectionSource.Unknown,
@@ -154,7 +154,7 @@ public static class ProductEndpoints
                 product.CheckLogs.Add(new ProductCheckLog
                 {
                     Level = ProductCheckLogLevel.Info,
-                    Status = MonitorHealthStatus.Ok,
+                    Status = product.MonitoringStatus,
                     Message = "Produkt dodany z danych odczytanych przez wtyczke.",
                     Price = request.CurrentPrice,
                     IsAvailable = product.IsAvailable,
@@ -279,7 +279,7 @@ public static class ProductEndpoints
 
             var product = await dbContext.Products
                 .Where(item => item.Id == id && item.UserId == user.Id)
-                .Select(item => new { item.Id, item.CurrentPrice })
+                .Select(item => new { item.Id, item.CurrentPrice, item.Currency })
                 .FirstOrDefaultAsync(cancellationToken);
             if (product is null)
             {
@@ -293,7 +293,7 @@ public static class ProductEndpoints
                 .ToListAsync(cancellationToken);
 
             await dbContext.SaveChangesAsync(cancellationToken);
-            return Results.Ok(PriceHistoryResponse.FromHistory(historyRows, product.CurrentPrice));
+            return Results.Ok(PriceHistoryResponse.FromHistory(historyRows, product.CurrentPrice, product.Currency));
         });
 
         group.MapPost("/{id:guid}/check", async (
@@ -348,18 +348,29 @@ public static class ProductEndpoints
                 return Results.BadRequest(new { error = "A valid http(s) product URL is required." });
             }
 
-            var snapshot = await scraper.ScrapeAsync(new Product
+            try
             {
-                UserId = user.Id,
-                Url = uri.ToString(),
-                Name = string.Empty,
-                ShopName = uri.Host.Replace("www.", string.Empty),
-                PriceSelector = request.PriceSelector,
-                StockSelector = request.StockSelector
-            }, cancellationToken);
+                var snapshot = await scraper.ScrapeAsync(new Product
+                {
+                    UserId = user.Id,
+                    Url = uri.ToString(),
+                    Name = string.Empty,
+                    ShopName = uri.Host.Replace("www.", string.Empty),
+                    PriceSelector = request.PriceSelector,
+                    StockSelector = request.StockSelector
+                }, cancellationToken);
 
-            await dbContext.SaveChangesAsync(cancellationToken);
-            return Results.Ok(snapshot);
+                await dbContext.SaveChangesAsync(cancellationToken);
+                return Results.Ok(snapshot);
+            }
+            catch (HttpRequestException)
+            {
+                return Results.UnprocessableEntity(new { error = "The store page could not be fetched." });
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                return Results.UnprocessableEntity(new { error = "The store page timed out." });
+            }
         });
 
         return app;
@@ -674,6 +685,7 @@ public sealed record ProductResponse(
     private static decimal? CalculateLowestPrice(Product product)
     {
         var prices = product.PriceHistory
+            .Where(history => history.Currency == product.Currency && history.Source != StoreDetectionSource.Unknown)
             .Select(history => history.Price)
             .Where(price => price is > 0)
             .Select(price => price!.Value)
@@ -690,6 +702,7 @@ public sealed record ProductResponse(
     private static decimal? CalculateAveragePrice(Product product)
     {
         var prices = product.PriceHistory
+            .Where(history => history.Currency == product.Currency && history.Source != StoreDetectionSource.Unknown)
             .Select(history => history.Price)
             .Where(price => price is > 0)
             .Select(price => price!.Value)
@@ -783,6 +796,7 @@ public sealed record ProductResponse(
     }
 
     private static List<decimal> HistoricalPrices(Product product) => product.PriceHistory
+        .Where(history => history.Currency == product.Currency && history.Source != StoreDetectionSource.Unknown)
         .OrderBy(history => history.CheckedAt)
         .Select(history => history.Price)
         .Where(price => price is > 0)
@@ -803,7 +817,7 @@ public sealed record ProductDetailResponse(
             .OrderBy(rule => rule.Type)
             .Select(rule => new AlertRuleResponse(rule.Id, rule.Type.ToString(), rule.TargetPrice, rule.PercentDrop, rule.IsActive, rule.LastTriggeredAt))
             .ToList(),
-        PriceHistoryResponse.FromHistory(product.PriceHistory, product.CurrentPrice),
+        PriceHistoryResponse.FromHistory(product.PriceHistory, product.CurrentPrice, product.Currency),
         product.Notifications
             .OrderByDescending(notification => notification.SentAt)
             .Select(notification => new NotificationResponse(notification.Id, notification.Type.ToString(), notification.Channel.ToString(), notification.Message, notification.SentAt))
@@ -827,26 +841,30 @@ public sealed record PriceHistoryResponse(
     string Currency,
     bool IsAvailable,
     DateTimeOffset CheckedAt,
-    string Source)
+    string Source,
+    bool ObservedPrice)
 {
-    public static IReadOnlyList<PriceHistoryResponse> FromHistory(IEnumerable<PriceHistory> history, decimal? fallbackPrice)
+    public static IReadOnlyList<PriceHistoryResponse> FromHistory(
+        IEnumerable<PriceHistory> history, decimal? fallbackPrice, string currentCurrency)
     {
-        decimal? lastKnownPrice = null;
+        var lastKnownPrices = new Dictionary<string, decimal>(StringComparer.OrdinalIgnoreCase);
         var rows = new List<PriceHistoryResponse>();
 
         foreach (var item in history.OrderBy(item => item.CheckedAt))
         {
-            if (item.Price is > 0)
+            if (item.Price is { } observedPrice)
             {
-                lastKnownPrice = item.Price;
+                lastKnownPrices[item.Currency] = observedPrice;
             }
 
             rows.Add(new PriceHistoryResponse(
-                item.Price ?? lastKnownPrice ?? fallbackPrice,
+                lastKnownPrices.TryGetValue(item.Currency, out var price) ? price
+                    : item.Currency == currentCurrency ? fallbackPrice : null,
                 item.Currency,
                 item.IsAvailable,
                 item.CheckedAt,
-                item.Source.ToString()));
+                item.Source.ToString(),
+                item.Price is not null && item.Source != StoreDetectionSource.Unknown));
         }
 
         return rows;

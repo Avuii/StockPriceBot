@@ -41,6 +41,7 @@ app.MapCategoryEndpoints();
 app.MapDashboardEndpoints();
 app.MapAuthEndpoints();
 app.MapAccountEndpoints();
+app.MapPushEndpoints();
 app.MapHub<PriceUpdatesHub>("/hubs/price-updates");
 
 app.Run();

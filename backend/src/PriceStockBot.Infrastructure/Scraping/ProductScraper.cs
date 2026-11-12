@@ -9,51 +9,59 @@ using PriceStockBot.Core.Models;
 
 namespace PriceStockBot.Infrastructure.Scraping;
 
-public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
+public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory, PlaywrightStoreRenderer? renderer = null)
 {
     private const string BrowserUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
     public async Task<ProductSnapshot> ScrapeAsync(Product product, CancellationToken cancellationToken)
     {
-        var client = httpClientFactory.CreateClient(nameof(ProductScraper));
-        using var request = new HttpRequestMessage(HttpMethod.Get, product.Url);
-        ConfigureBrowserHeaders(request);
+        var uri = new Uri(product.Url);
+        if (!PublicStoreHttp.CanFetch(uri))
+        {
+            throw new HttpRequestException("A public store URL on a standard HTTP port is required.");
+        }
 
-        var response = await client.SendAsync(request, cancellationToken);
+        using var client = httpClientFactory.CreateClient(nameof(ProductScraper));
+        using var request = new HttpRequestMessage(HttpMethod.Get, uri);
+        ConfigureBrowserHeaders(request);
+        using var response = await client.SendAsync(request, cancellationToken);
         response.EnsureSuccessStatusCode();
 
+        uri = response.RequestMessage?.RequestUri ?? uri;
         var html = await response.Content.ReadAsStringAsync(cancellationToken);
+        var snapshot = Extract(product, uri, html);
+        if (snapshot.Price is null && renderer is not null)
+        {
+            var rendered = await renderer.TryExtractAsync(uri, content => Extract(product, uri, content), cancellationToken);
+            if (rendered is not null)
+            {
+                return rendered with { Source = StoreDetectionSource.PlaywrightFallback };
+            }
+        }
+
+        return snapshot;
+    }
+
+    private static ProductSnapshot Extract(Product product, Uri uri, string html)
+    {
         var rawHash = ComputeHash(html);
-        var uri = new Uri(product.Url);
-        var store = string.IsNullOrWhiteSpace(product.ShopName) ? uri.Host.Replace("www.", string.Empty) : product.ShopName;
+        var store = string.IsNullOrWhiteSpace(product.ShopName) ? uri.Host : product.ShopName;
+        var adapter = StoreMarkup.Read(product, html, uri, store, rawHash);
+        if (adapter is not null) return Merge(product, adapter);
 
         var jsonLd = TryReadJsonLd(html, store, rawHash);
-        if (jsonLd is not null)
-        {
-            return Merge(product, jsonLd);
-        }
+        if (jsonLd?.Price is not null) return Merge(product, jsonLd);
 
         var meta = TryReadMetaTags(html, store, rawHash);
-        if (meta is not null)
-        {
-            return Merge(product, meta);
-        }
+        if (meta?.Price is not null) return Merge(product, meta);
 
-        var selectorSnapshot = TryReadSavedSelectors(product, html, store, rawHash);
-        if (selectorSnapshot is not null)
-        {
-            return Merge(product, selectorSnapshot);
-        }
+        var saved = TryReadSavedSelectors(product, html, store, rawHash);
+        var snapshot = saved ?? jsonLd ?? meta;
 
-        return new ProductSnapshot(
-            product.Name,
-            product.CurrentPrice,
-            product.Currency,
-            product.ImageUrl,
-            product.IsAvailable,
-            store,
-            rawHash,
-            StoreDetectionSource.Unknown);
+        return snapshot is null
+            ? new ProductSnapshot(product.Name, null, product.Currency, product.ImageUrl, product.IsAvailable,
+                store, rawHash, StoreDetectionSource.Unknown)
+            : Merge(product, snapshot);
     }
 
     private static ProductSnapshot Merge(Product product, ProductSnapshot snapshot)
@@ -61,12 +69,18 @@ public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
         return snapshot with
         {
             Name = string.IsNullOrWhiteSpace(snapshot.Name) ? product.Name : snapshot.Name,
-            Currency = string.IsNullOrWhiteSpace(snapshot.Currency) ? product.Currency : snapshot.Currency,
+            Currency = NormalizeCurrency(snapshot.Currency) ?? product.Currency,
             ImageUrl = string.IsNullOrWhiteSpace(snapshot.ImageUrl) ? product.ImageUrl : snapshot.ImageUrl
         };
     }
 
-    private static void ConfigureBrowserHeaders(HttpRequestMessage request)
+    private static string? NormalizeCurrency(string currency)
+    {
+        var normalized = currency.Trim().ToUpperInvariant();
+        return normalized.Length == 3 && normalized.All(char.IsAsciiLetterUpper) ? normalized : null;
+    }
+
+    internal static void ConfigureBrowserHeaders(HttpRequestMessage request)
     {
         request.Headers.UserAgent.ParseAdd(BrowserUserAgent);
         request.Headers.TryAddWithoutValidation("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8");
@@ -112,7 +126,7 @@ public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
                 return new ProductSnapshot(
                     name,
                     offers.Price,
-                    offers.Currency ?? "PLN",
+                    offers.Currency ?? string.Empty,
                     image,
                     offers.IsAvailable,
                     store,
@@ -184,7 +198,7 @@ public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
 
         if (type.ValueKind == JsonValueKind.Array)
         {
-            return type.EnumerateArray().Any(value => value.GetString()?.Contains("Product", StringComparison.OrdinalIgnoreCase) == true);
+            return type.EnumerateArray().Any(value => value.ValueKind == JsonValueKind.String && value.GetString()?.Contains("Product", StringComparison.OrdinalIgnoreCase) == true);
         }
 
         return false;
@@ -201,7 +215,7 @@ public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
         var price = ReadDecimal(offer, "price") ?? ReadDecimal(offer, "lowPrice");
         var currency = ReadString(offer, "priceCurrency");
         var availability = ReadString(offer, "availability");
-        var isAvailable = availability is null || !availability.Contains("OutOfStock", StringComparison.OrdinalIgnoreCase);
+        var isAvailable = availability is null || !OutOfStockRegex().IsMatch(availability);
 
         return (price, currency, isAvailable);
     }
@@ -211,7 +225,7 @@ public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
         var title = ReadMeta(html, "og:title") ?? ReadMeta(html, "twitter:title") ?? ReadTitle(html);
         var priceText = ReadMeta(html, "product:price:amount") ?? ReadMeta(html, "og:price:amount");
         var price = ParsePrice(priceText);
-        var currency = ReadMeta(html, "product:price:currency") ?? ReadMeta(html, "og:price:currency") ?? "PLN";
+        var currency = ReadMeta(html, "product:price:currency") ?? ReadMeta(html, "og:price:currency") ?? string.Empty;
         var image = ReadMeta(html, "og:image") ?? ReadMeta(html, "twitter:image");
         var availability = ReadMeta(html, "product:availability") ?? ReadMeta(html, "availability");
 
@@ -225,7 +239,7 @@ public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
             price,
             currency,
             image,
-            !string.Equals(availability, "out of stock", StringComparison.OrdinalIgnoreCase),
+            availability is null || !OutOfStockRegex().IsMatch(availability),
             store,
             rawHash,
             StoreDetectionSource.MetaTags);
@@ -259,14 +273,14 @@ public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
 
     private static string? ReadString(JsonElement element, string propertyName)
     {
-        return element.TryGetProperty(propertyName, out var value) && value.ValueKind == JsonValueKind.String
+        return element.ValueKind == JsonValueKind.Object && element.TryGetProperty(propertyName, out var value) && value.ValueKind == JsonValueKind.String
             ? value.GetString()
             : null;
     }
 
     private static decimal? ReadDecimal(JsonElement element, string propertyName)
     {
-        if (!element.TryGetProperty(propertyName, out var value))
+        if (element.ValueKind != JsonValueKind.Object || !element.TryGetProperty(propertyName, out var value))
         {
             return null;
         }
@@ -289,7 +303,7 @@ public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
         return image.ValueKind switch
         {
             JsonValueKind.String => image.GetString(),
-            JsonValueKind.Array => image.EnumerateArray().FirstOrDefault().GetString(),
+            JsonValueKind.Array => image.EnumerateArray().FirstOrDefault(value => value.ValueKind == JsonValueKind.String) is { ValueKind: JsonValueKind.String } first ? first.GetString() : null,
             JsonValueKind.Object => ReadString(image, "url"),
             _ => null
         };
@@ -324,7 +338,7 @@ public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
         return match.Success ? match.Groups["value"].Value.Trim() : null;
     }
 
-    private static decimal? ParsePrice(string? value)
+    internal static decimal? ParsePrice(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -337,7 +351,11 @@ public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
             return null;
         }
 
-        var normalized = match.Value.Replace(" ", string.Empty).Replace(',', '.');
+        var normalized = Regex.Replace(match.Value, @"\s+", string.Empty);
+        var separator = Math.Max(normalized.LastIndexOf(','), normalized.LastIndexOf('.'));
+        normalized = separator >= 0 && normalized.Length - separator <= 3
+            ? normalized[..separator].Replace(",", "").Replace(".", "") + "." + normalized[(separator + 1)..]
+            : normalized.Replace(",", "").Replace(".", "");
         return decimal.TryParse(normalized, NumberStyles.Number, CultureInfo.InvariantCulture, out var price) ? price : null;
     }
 
@@ -359,6 +377,6 @@ public sealed partial class ProductScraper(IHttpClientFactory httpClientFactory)
     [GeneratedRegex(@"\d+(?:[\s.,]\d{3})*(?:[,.]\d{1,2})?")]
     private static partial Regex PriceRegex();
 
-    [GeneratedRegex("niedostepny|brak|out of stock|unavailable|sold out", RegexOptions.IgnoreCase)]
+    [GeneratedRegex("niedost[eę]pn|brak|out[ _-]*of[ _-]*stock|unavailable|sold[ _-]*out|discontinued", RegexOptions.IgnoreCase)]
     private static partial Regex OutOfStockRegex();
 }

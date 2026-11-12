@@ -14,6 +14,8 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<ProductCheckLog> ProductCheckLogs => Set<ProductCheckLog>();
 
+    public DbSet<BrowserPushSubscription> BrowserPushSubscriptions => Set<BrowserPushSubscription>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AppUser>(entity =>
@@ -66,6 +68,17 @@ public sealed class AppDbContext(DbContextOptions<AppDbContext> options) : DbCon
                 CreatedAt = new DateTimeOffset(2026, 7, 5, 0, 0, 0, TimeSpan.Zero),
                 UpdatedAt = new DateTimeOffset(2026, 7, 5, 0, 0, 0, TimeSpan.Zero)
             });
+        });
+
+        modelBuilder.Entity<BrowserPushSubscription>(entity =>
+        {
+            entity.HasKey(item => item.EndpointHash);
+            entity.Property(item => item.EndpointHash).HasMaxLength(64);
+            entity.Property(item => item.UserId).HasMaxLength(64);
+            entity.Property(item => item.Endpoint).HasMaxLength(2048);
+            entity.Property(item => item.P256dh).HasMaxLength(87);
+            entity.Property(item => item.Auth).HasMaxLength(22);
+            entity.HasOne<AppUser>().WithMany().HasForeignKey(item => item.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<UserSession>(entity =>

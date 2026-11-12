@@ -72,6 +72,9 @@ import { Badge, BrandLogo, Field, Info, Shell, Stat, Toggle } from './components
 import { DesktopSidebar, MobileNavigation, TopBar } from './components/layout/AppNavigation';
 import { PageHeader } from './components/layout/PageHeader';
 import { FiltersBar } from './components/products/FiltersBar';
+import { disableBrowserPush } from './lib/browserPush';
+import { importProductKey, maxImportCharacters, parseProductImport } from './lib/productImport';
+import { ProductComparison } from './components/products/ProductComparison';
 import { ProductDetailsModal } from './components/products/ProductDetailsModal';
 import { ProductImageCard, ProductRow } from './components/products/ProductCards';
 import { ProductForm } from './components/products/ProductForm';
@@ -128,6 +131,14 @@ export default function App({ connection, apiClient = realApi, autoSignIn = fals
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [importText, setImportText] = useState('');
+  const [importBusy, setImportBusy] = useState(false);
+  const [importSaved, setImportSaved] = useState(0);
+  const [importedKeys, setImportedKeys] = useState<string[]>([]);
+  const [importFailures, setImportFailures] = useState<{ row: number; message: string }[]>([]);
+  const [importFileTooLarge, setImportFileTooLarge] = useState(false);
+  const [comparisonOpen, setComparisonOpen] = useState(false);
+  const importPreview = useMemo(() => parseProductImport(importText, products, importedKeys), [importText, products, importedKeys]);
+  const importReady = importPreview.rows.filter(({ product }) => product && !importedKeys.includes(importProductKey(product))).length;
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
   const storedWatchlistIdsRef = useRef<string[]>(readStoredWatchlistIds());
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('pricestockbot.theme') === 'dark');
@@ -165,11 +176,11 @@ export default function App({ connection, apiClient = realApi, autoSignIn = fals
   }, [filters, products, query]);
 
   const chartData = useMemo(() => history
-    .filter((point) => point.price !== null && point.price !== undefined)
+    .filter((point) => point.price != null && point.currency === selectedProduct?.currency)
     .map((point) => ({
       date: new Intl.DateTimeFormat('pl-PL', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }).format(new Date(point.checkedAt)),
       price: point.price ?? 0
-    })), [history]);
+    })), [history, selectedProduct?.currency]);
 
   async function loadData(options: { silent?: boolean } = {}) {
     const silent = options.silent ?? false;
@@ -396,12 +407,17 @@ export default function App({ connection, apiClient = realApi, autoSignIn = fals
 
   async function logout() {
     try {
+      if (api === realApi) await disableBrowserPush().catch(() => undefined);
       await api.logout();
     } finally {
       setToken(null);
       setUser(null);
       setProducts([]);
       setCategories([]);
+      setSelectedProductIds([]);
+      setComparisonOpen(false);
+      setImportModalOpen(false);
+      updateImportText('');
       setHistory([]);
       setSelectedDetail(null);
       setSelectedId(null);
@@ -541,7 +557,8 @@ export default function App({ connection, apiClient = realApi, autoSignIn = fals
       t(language, 'color'),
       t(language, 'availability'),
       t(language, 'monitoring'),
-      'URL'
+      'URL',
+      t(language, 'currency')
     ];
     const rows = targetProducts.map((product) => [
       product.name,
@@ -553,7 +570,8 @@ export default function App({ connection, apiClient = realApi, autoSignIn = fals
       product.color ?? '',
       product.isAvailable ? t(language, 'available') : t(language, 'unavailable'),
       product.isActive ? t(language, 'active') : t(language, 'inactive'),
-      product.url
+      product.url,
+      product.currency
     ]);
     const csv = [headers, ...rows].map((row) => row.map(csvCell).join(';')).join('\n');
     const blob = new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8;' });
@@ -565,41 +583,49 @@ export default function App({ connection, apiClient = realApi, autoSignIn = fals
     URL.revokeObjectURL(url);
   }
 
+  function updateImportText(text: string) {
+    setImportText(text);
+    setImportSaved(0);
+    setImportedKeys([]);
+    setImportFailures([]);
+    setImportFileTooLarge(false);
+  }
+
   async function importWishlist(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const urls = importText
-      .split(/\r?\n/)
-      .map((line) => line.match(/https?:\/\/[^\s;"',]+/i)?.[0] ?? line.trim())
-      .filter(Boolean);
-
-    if (urls.length === 0) {
-      return;
-    }
-
+    if (importBusy || !importReady || importFileTooLarge) return;
+    setImportBusy(true);
+    const failures: { row: number; message: string }[] = [];
+    const saved: string[] = [];
     try {
-      for (const rawUrl of urls) {
-        const url = new URL(rawUrl);
-        const shopName = url.hostname.replace(/^www\./, '');
-        await api.createProduct({
-          url: url.toString(),
-          name: shopName,
-          shopName,
-          currency: 'PLN',
-          isAvailable: true,
-          trackStock: true,
-          isActive: true,
-          alertOnPriceDrop: settings.notifyTargetPrice,
-          alertOnBackInStock: settings.notifyBackInStock,
-          percentDrop: settings.minimumDiscountPercent,
-          checkIntervalMinutes: settings.defaultCheckIntervalMinutes
-        });
-      }
+      for (const { row, product } of importPreview.rows) {
+        if (!product) continue;
+        const key = importProductKey(product);
+        if (importedKeys.includes(key)) continue;
 
-      setImportText('');
-      setImportModalOpen(false);
-      await loadData();
-    } catch (importError) {
-      setError(importError instanceof Error ? importError.message : 'Nie udalo sie zaimportowac URL-i.');
+        try {
+          await api.createProduct({
+            isAvailable: true,
+            trackStock: true,
+            isActive: true,
+            alertOnPriceDrop: settings.notifyTargetPrice,
+            alertOnBackInStock: settings.notifyBackInStock,
+            percentDrop: settings.minimumDiscountPercent,
+            checkIntervalMinutes: settings.defaultCheckIntervalMinutes,
+            ...product
+          });
+          saved.push(key);
+        } catch (error) {
+          failures.push({ row, message: error instanceof Error ? error.message : t(language, 'importInvalidUrl') });
+          if (!getToken()) break;
+        }
+      }
+      setImportFailures(failures);
+      setImportSaved(count => count + saved.length);
+      setImportedKeys(keys => [...keys, ...saved]);
+      if (saved.length) await loadData();
+    } finally {
+      setImportBusy(false);
     }
   }
 
@@ -815,6 +841,7 @@ export default function App({ connection, apiClient = realApi, autoSignIn = fals
                         onEnable={() => bulkSetMonitoring(true)}
                         onDisable={() => bulkSetMonitoring(false)}
                         onChangeCategory={bulkChangeCategory}
+                        onCompare={() => setComparisonOpen(true)}
                         onExport={() => exportProductsList(selectedProductsForBulk, 'pricestockbot-selected-products.csv')}
                         onClear={() => setSelectedProductIds([])}
                         language={language}
@@ -965,7 +992,7 @@ export default function App({ connection, apiClient = realApi, autoSignIn = fals
               )}
 
               {activeView === 'settings' && (
-                <SettingsView settings={settings} setSettings={setSettings} onSubmit={saveSettings} onTestEmail={sendTestEmail} apiToken={getToken() ?? ''} language={language} />
+                <SettingsView showBrowserPush={api === realApi} settings={settings} setSettings={setSettings} onSubmit={saveSettings} onTestEmail={sendTestEmail} apiToken={getToken() ?? ''} language={language} />
               )}
             </div>
 
@@ -1067,6 +1094,10 @@ export default function App({ connection, apiClient = realApi, autoSignIn = fals
           </div>
         )}
 
+        {comparisonOpen && (
+          <ProductComparison products={selectedProductsForBulk} language={language} onClose={() => setComparisonOpen(false)} />
+        )}
+
         {importModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0B1020]/70 p-4 backdrop-blur-sm">
             <section className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-panel dark:border-[#28344C] dark:bg-[#151D30]">
@@ -1075,17 +1106,45 @@ export default function App({ connection, apiClient = realApi, autoSignIn = fals
                   <h2 className="text-lg font-semibold tracking-normal">{t(language, 'importWishlist')}</h2>
                   <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t(language, 'importWishlistDescription')}</p>
                 </div>
-                <button className="icon-button" onClick={() => setImportModalOpen(false)} title={t(language, 'close')}>
+                <button className="icon-button" disabled={importBusy} onClick={() => setImportModalOpen(false)} title={t(language, 'close')}>
                   <X className="h-4 w-4" />
                 </button>
               </div>
               <form className="space-y-3" onSubmit={importWishlist}>
                 <Field label={t(language, 'pasteUrls')}>
-                  <textarea className="field min-h-44 py-3 font-mono text-xs" value={importText} onChange={(event) => setImportText(event.target.value)} placeholder={'https://sklep.pl/produkt-1\nhttps://sklep.pl/produkt-2'} />
+                  <textarea className="field min-h-44 py-3 font-mono text-xs" value={importText} disabled={importBusy} onChange={(event) => updateImportText(event.target.value)} placeholder={'https://sklep.pl/produkt-1\nhttps://sklep.pl/produkt-2'} />
                 </Field>
-                <button className="primary-button w-full" type="submit">
+                <Field label={t(language, 'importFile')}>
+                  <input type="file" accept=".csv,.tsv,text/csv,text/tab-separated-values" disabled={importBusy} onChange={async event => {
+                    const file = event.target.files?.[0];
+                    event.target.value = '';
+                    if (!file) return;
+                    if (file.size > maxImportCharacters) {
+                      setImportFileTooLarge(true);
+                      return;
+                    }
+                    try {
+                      updateImportText(await file.text());
+                    } catch (error) {
+                      setImportFailures([{ row: 0, message: error instanceof Error ? error.message : t(language, 'importInvalidCsv') }]);
+                    }
+                  }} />
+                </Field>
+                {(importFileTooLarge || importPreview.issue) && (
+                  <p role="alert" className="text-sm text-rose-600">{t(language, importFileTooLarge ? 'importTooLarge' : importPreview.issue!)}</p>
+                )}
+                {(importPreview.rows.length > 0 || importSaved > 0) && (
+                  <p role="status" className="text-sm">{t(language, 'importReady')} {importReady} · {t(language, 'importSaved')} {importSaved}</p>
+                )}
+                <ul className="max-h-36 overflow-auto text-sm text-rose-700 dark:text-rose-300">
+                  {importPreview.rows.filter(row => row.issue).map(row => (
+                    <li key={row.row}>{t(language, 'importRow')} {row.row} · {t(language, row.issue!)}</li>
+                  ))}
+                  {importFailures.map(row => <li key={row.row}>{row.row > 0 && `${t(language, 'importRow')} ${row.row} · `}{row.message}</li>)}
+                </ul>
+                <button className="primary-button w-full" type="submit" disabled={importBusy || !importReady || importFileTooLarge}>
                   <Upload className="h-4 w-4" />
-                  {t(language, 'importProducts')}
+                  {t(language, importBusy ? 'importingProducts' : 'importProducts')}
                 </button>
               </form>
             </section>
@@ -1274,6 +1333,7 @@ function BulkActionsBar({
   onDisable,
   onChangeCategory,
   onExport,
+  onCompare,
   onClear,
   language
 }: {
@@ -1284,6 +1344,7 @@ function BulkActionsBar({
   onDisable: () => void;
   onChangeCategory: (categoryName: string) => void;
   onExport: () => void;
+  onCompare: () => void;
   onClear: () => void;
   language: Language;
 }) {
@@ -1311,6 +1372,7 @@ function BulkActionsBar({
         </div>
         <button className="text-button min-h-9 px-3" type="button" onClick={onEnable}>{t(language, 'enableMonitoringSelected')}</button>
         <button className="text-button min-h-9 px-3" type="button" onClick={onDisable}>{t(language, 'disableMonitoringSelected')}</button>
+        {selectedCount > 1 && <button className="text-button min-h-9 px-3" type="button" onClick={onCompare}>{t(language, 'compareProducts')}</button>}
         <button className="text-button min-h-9 px-3" type="button" onClick={onExport}>{t(language, 'exportSelected')}</button>
         <button className="text-button min-h-9 px-3" type="button" onClick={onClear}>{t(language, 'clearSelection')}</button>
         <button className="text-button min-h-9 px-3 text-rose-700 dark:text-rose-300" type="button" onClick={onDelete}>

@@ -63,6 +63,7 @@ export type PriceHistoryPoint = {
   isAvailable: boolean;
   checkedAt: string;
   source: string;
+  observedPrice?: boolean;
 };
 
 export type ProductDetail = {

@@ -4,5 +4,6 @@ public enum NotificationChannel
 {
     Telegram = 1,
     Discord = 2,
-    Email = 3
+    Email = 3,
+    WebPush = 4
 }

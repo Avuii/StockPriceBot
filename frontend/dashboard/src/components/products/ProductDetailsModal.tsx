@@ -10,7 +10,7 @@ import {
 } from 'recharts';
 import { type Language, t } from '../../i18n';
 import { formatDate, formatMoney } from '../../lib/formatters';
-import { getPriceInsight, healthLabel, healthPillClass, priceBadgeClass } from '../../lib/productInsights';
+import { getHistoryRecommendation, getPriceInsight, healthLabel, healthPillClass, priceBadgeClass } from '../../lib/productInsights';
 import type { Product, ProductCheckLog, ProductDetail, PriceHistoryPoint } from '../../types';
 import { CollapsibleSection } from '../common/CollapsibleSection';
 import { Badge, Info } from '../common/ui';
@@ -41,6 +41,7 @@ export function ProductDetailsModal({
 }: ProductDetailsModalProps) {
   const insight = getPriceInsight(detail?.product ?? product);
   const history = detail?.history ?? [];
+  const recommendation = getHistoryRecommendation(detail?.product ?? product, history);
   const notifications = detail?.notifications ?? [];
   const checkLogs = detail?.checkLogs ?? [];
 
@@ -131,6 +132,15 @@ export function ProductDetailsModal({
           </aside>
 
           <div className="space-y-4">
+            <section className="panel space-y-2 p-4">
+              <h3 className="font-semibold">{t(language, 'historyRecommendation')}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300">{t(language, recommendation.key)}</p>
+              {recommendation.median != null && (
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  {t(language, 'recentMedian')} {formatMoney(recommendation.median, product.currency)} · {t(language, 'observedDays')} {recommendation.days}
+                </p>
+              )}
+            </section>
             <PriceHistoryPanel selectedProduct={product} chartData={chartData} darkMode={darkMode} language={language} />
             <AvailabilityHistoryPanel history={history} language={language} />
             <AlertLogPanel notifications={notifications} language={language} />

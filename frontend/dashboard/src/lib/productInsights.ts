@@ -1,6 +1,6 @@
 import type { Language } from '../i18n';
 import { t } from '../i18n';
-import type { Product } from '../types';
+import type { PriceHistoryPoint, Product } from '../types';
 import { discountPercent } from './productMetrics';
 
 export type PriceBadgeTone = 'good' | 'best' | 'wait' | 'high';
@@ -9,7 +9,7 @@ export type PriceInsight = {
   lowestPrice?: number | null;
   averagePrice?: number | null;
   currentVsAveragePercent?: number | null;
-  badgeKey: 'goodDealBadge' | 'lowestPriceBadge' | 'waitBadge' | 'inflatedPriceBadge';
+  badgeKey: 'goodDealBadge' | 'lowestPriceBadge' | 'waitBadge' | 'inflatedPriceBadge' | 'noHistoryBadge' | 'unavailablePriceBadge';
   tone: PriceBadgeTone;
 };
 
@@ -20,6 +20,16 @@ export function getPriceInsight(product: Product): PriceInsight {
   const currentVsAverage = product.currentVsAveragePercent
     ?? (current !== null && average && average > 0 ? ((current - average) / average) * 100 : null);
   const discount = discountPercent(product);
+
+  if (current === null || !product.isAvailable || (product.monitoringStatus && product.monitoringStatus !== 'Ok')) {
+    return { lowestPrice: lowest, averagePrice: average, currentVsAveragePercent: currentVsAverage,
+      badgeKey: 'unavailablePriceBadge', tone: 'wait' };
+  }
+
+  if ((product.priceHistoryCount ?? 0) < 3) {
+    return { lowestPrice: lowest, averagePrice: average, currentVsAveragePercent: currentVsAverage,
+      badgeKey: 'noHistoryBadge', tone: 'wait' };
+  }
 
   if (current !== null && lowest !== null && product.isCurrentLowestHistoricalPrice && product.hasPriceHistoryChange) {
     return {
@@ -58,6 +68,36 @@ export function getPriceInsight(product: Product): PriceInsight {
     badgeKey: 'waitBadge',
     tone: 'wait'
   };
+}
+
+export function getHistoryRecommendation(product: Product, history: PriceHistoryPoint[], now = new Date()) {
+  const current = product.currentPrice;
+  if (!product.isAvailable || current == null || current <= 0 || product.monitoringStatus !== 'Ok') {
+    return { key: 'recommendationUnavailable' as const, days: 0 };
+  }
+
+  const cutoff = now.getTime() - 30 * 86_400_000;
+  const today = now.toISOString().slice(0, 10);
+  const daily = new Map<string, { timestamp: number; price: number }>();
+  for (const point of history) {
+    const timestamp = Date.parse(point.checkedAt);
+    if (!Number.isFinite(timestamp) || timestamp < cutoff || timestamp > now.getTime()
+      || point.observedPrice === false || point.source === 'Unknown' || !point.isAvailable
+      || point.currency !== product.currency || point.price == null || point.price <= 0) continue;
+
+    const date = new Date(timestamp).toISOString().slice(0, 10);
+    if (date === today || (daily.get(date)?.timestamp ?? 0) >= timestamp) continue;
+    daily.set(date, { timestamp, price: point.price });
+  }
+
+  const prices = [...daily.values()].map(point => point.price).sort((a, b) => a - b);
+  const days = prices.length;
+  if (days < 3) return { key: 'recommendationMoreData' as const, days };
+
+  const median = (prices[Math.floor((days - 1) / 2)] + prices[Math.floor(days / 2)]) / 2;
+  const key = current <= prices[0] * 1.02 && current <= median * 0.95 ? 'recommendationBuy'
+    : current >= median * 1.10 ? 'recommendationWait' : 'recommendationWatch';
+  return { key, days, median } as const;
 }
 
 export function priceBadgeClass(tone: PriceBadgeTone) {

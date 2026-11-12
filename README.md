@@ -130,11 +130,12 @@ The [interactive GitHub Pages demo](https://avuii.github.io/StockPriceBot/demo/)
 | **Scheduled Monitoring** | Run periodic checks and keep price, availability, and monitoring history. |
 | **Price & Stock Alerts** | Detect target prices, percentage drops, restocks, and selected variant availability. |
 | **Watchlist & Categories** | Prioritize products and organize them using custom categories, colors, and icons. |
-| **Search & Bulk Operations** | Filter, sort, and manage multiple tracked products; import wishlists and export CSV files. |
-| **Analytics** | Explore price charts, recent alerts, potential savings, and monitoring statistics. |
+| **Search & Bulk Operations** | Filter and manage multiple products, preview URL and CSV imports, retry failed rows, and export CSV. |
+| **Store Comparisons** | Select equivalent tracked offers and compare prices, variants, availability, and check timestamps by currency. |
+| **Analytics** | Explore price charts, recent alerts, potential savings, and recommendations based on observed prices. |
 | **Personalization** | Responsive dashboard, light/dark themes, and Polish/English interface. |
 
-The extraction pipeline first looks for structured product data (JSON-LD and `schema.org/Product`), then metadata, detected or saved CSS selectors, and finally a user-selected price element. When a page cannot be read reliably, monitoring records an error rather than silently accepting an unchanged price.
+The extraction pipeline checks for Shopify theme product JSON and WooCommerce product markup, then tries JSON-LD, metadata, and saved CSS selectors. When enabled, the Playwright fallback retries extraction against the rendered page if the HTTP response contains no usable price. The extension also supports manually selecting a price element.
 
 Alerts can be configured with target prices, percentage thresholds, restock conditions, selected variants, daily email limits, and digest preferences.
 
@@ -149,7 +150,7 @@ Alerts can be configured with target prices, percentage thresholds, restock cond
 | **Background Processing** | Quartz.NET |
 | **Real-Time Communication** | SignalR |
 | **Browser Extension** | Chrome Manifest V3, React, TypeScript, content scripts, service worker |
-| **Notifications** | SMTP email |
+| **Notifications** | SMTP email, Telegram, and browser Web Push |
 | **Infrastructure** | Docker Compose |
 | **Demo** | React with a mock API and sample product data |
 
@@ -215,7 +216,7 @@ StockPriceBot/
 ### Prerequisites
 
 - Docker Desktop with Linux containers enabled.
-- .NET SDK 8 for backend builds and tests.
+- .NET 8 runtime and an SDK that supports the `.slnx` solution format, such as .NET SDK 10.
 - Node.js 20 or newer and npm.
 - Chrome or another Chromium-based browser for the extension.
 
@@ -319,6 +320,24 @@ The SMTP sender is configured at application level. Users configure a recipient 
 > [!IMPORTANT]
 > Keep `.env` and all real credentials out of version control. The committed `.env.example` must contain only placeholders or non-sensitive defaults. Do not expose tokens or SMTP credentials in frontend code.
 
+### Rendered Store Pages
+
+Set `PLAYWRIGHT_ENABLED=true` in `.env` and rebuild with `docker compose up --build -d`. Compose installs Chromium in both the API and worker images so previews and scheduled checks can use the fallback. For a native .NET run, build the API and worker, run either generated `playwright.ps1 install chromium` script, and set `Scraping__PlaywrightEnabled=true` for both processes. On Linux, add `--with-deps` to the install command when Chromium's system dependencies are missing.
+
+Store fetches require publicly routable IPv4 on standard HTTP or HTTPS ports. The browser fallback has a time and request budget and may miss offers behind login, blocked automation, or complex browser interactions.
+
+### Browser Notifications
+
+Generate a VAPID key pair with `npx web-push generate-vapid-keys`. Set `WEB_PUSH_PUBLIC_KEY`, `WEB_PUSH_PRIVATE_KEY`, and `WEB_PUSH_SUBJECT` (for example, `mailto:alerts@example.com`) in `.env` and restart the API and worker. For native runs use the corresponding `Notifications__WebPush__PublicKey`, `Notifications__WebPush__PrivateKey`, and `Notifications__WebPush__Subject` settings. Both processes need the same stable keys.
+
+On the HTTPS dashboard or localhost, open **Settings**, choose **Enable browser notifications**, and grant permission. Browser notifications use the existing product alert rules. Each browser subscribes separately.
+
+### Import and Compare Offers
+
+In **Products**, open **Import wishlist**. Paste whitespace-separated HTTP(S) URLs or upload a CSV with a `URL` header. CSV supports comma, semicolon, or tab separators and the dashboard's English and Polish export headers, including currency, prices, category, and variants. Review the valid and skipped rows before importing. A failed row can be retried from the same dialog. An active product imported without a price is eligible for the next scheduled check.
+
+Select two or more tracked offers for equivalent products and variants, then choose **Compare prices**. The dashboard groups prices by currency and highlights the lowest available price among checked offers in each group. Product details show a recommendation once there are observations from at least three prior days in the last 30 days. The recommendation uses the latest in-stock observation per day in the offer's current currency.
+
 ### API Reference
 
 | Method | Endpoint | Purpose |
@@ -332,6 +351,8 @@ The SMTP sender is configured at application level. Users configure a recipient 
 | `GET` | `/api/account/settings` | Read account settings |
 | `PATCH` | `/api/account/settings` | Update account settings |
 | `POST` | `/api/account/settings/test-email` | Send a test email |
+| `GET` | `/api/account/push/key` | Retrieve the VAPID public key |
+| `PUT`, `DELETE` | `/api/account/push/subscription` | Enable or remove a browser subscription |
 | `GET` | `/api/products` | List tracked products |
 | `GET` | `/api/products/{id}` | Retrieve a tracked product |
 | `POST` | `/api/products` | Add a product |
@@ -355,8 +376,7 @@ The SignalR hub is available at `/hubs/price-updates` in the full application. T
 Run backend tests from the repository root:
 
 ```bash
-cd backend
-dotnet test
+dotnet test PriceStockBot.slnx
 ```
 
 Build the dashboard, extension, and standalone demo from the repository root:
@@ -391,7 +411,15 @@ cd ..
 
 The [interactive demo](https://avuii.github.io/StockPriceBot/demo/) is published separately on GitHub Pages. The dashboard, backend, worker, database, and browser extension require the full application setup; the demo build alone does not verify those components.
 
-The build and test commands above can be used for local verification. Expanded integration and end-to-end testing remains on the roadmap.
+The [Application tests workflow](.github/workflows/tests.yml) builds the dashboard and extension, then runs the backend tests and Chromium workflows. The browser tests exercise CSV import and retry, offer comparisons, price recommendations, browser subscription controls, and extension capture and submission using fixture store pages and API responses.
+
+To run the browser tests locally, build the dashboard and extension with the default API URL, build the solution, then run these commands in PowerShell:
+
+```powershell
+./backend/tests/PriceStockBot.Tests/bin/Debug/net8.0/playwright.ps1 install chromium
+$env:RUN_BROWSER_TESTS = '1'
+dotnet test PriceStockBot.slnx --no-build
+```
 
 ### Security & Privacy
 
@@ -421,7 +449,7 @@ The build and test commands above can be used for local verification. Expanded i
 | Chrome extension | Implemented |
 | Email alert flow | Implemented; SMTP configuration required |
 | GitHub Pages demo | Available; simulated data |
-| Automated testing | Backend tests available; additional coverage planned |
+| Automated testing | Backend and Chromium workflow tests |
 | Full production deployment | Planned |
 
 ### Implemented
@@ -440,21 +468,19 @@ The build and test commands above can be used for local verification. Expanded i
 - [x] Standalone mock-data demo on GitHub Pages.
 - [x] Backend parser and alert-rule tests.
 
+- [x] Shopify and WooCommerce extraction with an optional Playwright fallback.
+- [x] Browser notifications with VAPID configuration.
+- [x] CSV import preview and per-row retry, cross-store comparison, and price-history recommendations.
+- [x] Dashboard and extension Chromium workflow tests.
+
 ### Planned Improvements
 
-- [ ] Add store-specific extraction adapters for popular e-commerce platforms.
-- [ ] Add a Playwright fallback for JavaScript-heavy stores.
-- [ ] Introduce web push notifications.
-- [ ] Improve multi-URL imports and CSV import workflows.
-- [ ] Expand automated integration and end-to-end tests for the dashboard and extension.
 - [ ] Deploy the full dashboard, API, worker, and database to production.
-- [ ] Support cross-store price comparisons.
-- [ ] Add smarter recommendations based on price history.
 
 ### Known Limitations
 
 - Some stores block regular HTTP requests or require anti-bot challenges.
-- Product pages rendered with JavaScript may not expose their final price to the monitor.
+- Some JavaScript storefronts require interactions or authenticated sessions beyond the rendered price check.
 - Site redesigns can invalidate stored CSS selectors.
 - Variant detection requires the selected size or color to be discoverable on the page.
 - Email delivery depends on valid SMTP configuration.

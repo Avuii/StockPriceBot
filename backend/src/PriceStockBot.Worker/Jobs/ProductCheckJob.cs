@@ -3,6 +3,7 @@ using Quartz;
 
 namespace PriceStockBot.Worker.Jobs;
 
+[DisallowConcurrentExecution]
 public sealed class ProductCheckJob(
     IProductCheckService productCheckService,
     ILogger<ProductCheckJob> logger) : IJob

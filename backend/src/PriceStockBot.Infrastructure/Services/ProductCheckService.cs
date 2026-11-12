@@ -52,7 +52,8 @@ public sealed class ProductCheckService(
         try
         {
             var previous = await dbContext.PriceHistory
-                .Where(history => history.ProductId == product.Id)
+                .Where(history => history.ProductId == product.Id && (history.Price != null
+                    || history.Source == StoreDetectionSource.SavedSelector || history.Source == StoreDetectionSource.ExtensionPayload))
                 .OrderByDescending(history => history.CheckedAt)
                 .FirstOrDefaultAsync(cancellationToken);
 
@@ -61,32 +62,41 @@ public sealed class ProductCheckService(
             var snapshot = await adapter.ScrapeAsync(product, cancellationToken);
             var status = ResolveHealthStatus(product, snapshot);
             var message = ResolveHealthMessage(status);
-            var historyPrice = snapshot.Price ?? product.CurrentPrice;
+            var historyPrice = status == MonitorHealthStatus.Ok ? snapshot.Price : null;
+            var previousOffer = previous is null ? null : new PriceHistory
+            {
+                Price = previous.Currency == snapshot.Currency ? previous.Price : null,
+                IsAvailable = previous.IsAvailable
+            };
 
             product.Name = string.IsNullOrWhiteSpace(snapshot.Name) ? product.Name : snapshot.Name;
             product.ShopName = string.IsNullOrWhiteSpace(snapshot.Store) ? product.ShopName : snapshot.Store;
             product.ImageUrl = snapshot.ImageUrl ?? product.ImageUrl;
-            if (status == MonitorHealthStatus.Ok && snapshot.Price is not null)
+            if (historyPrice is not null)
             {
-                product.CurrentPrice = snapshot.Price;
+                product.CurrentPrice = historyPrice;
+                product.Currency = snapshot.Currency;
+                product.LastSuccessfulCheckAt = checkedAt;
             }
-            product.Currency = snapshot.Currency;
-            product.IsAvailable = snapshot.IsAvailable;
+
+            if (historyPrice is not null || snapshot.Source == StoreDetectionSource.SavedSelector)
+            {
+                product.IsAvailable = snapshot.IsAvailable;
+            }
             product.LastCheckedAt = checkedAt;
             product.LastRawHash = snapshot.RawHash;
             product.MonitoringStatus = status;
             product.LastCheckMessage = message;
             product.LastCheckError = null;
             product.LastCheckSource = snapshot.Source;
-            product.LastSuccessfulCheckAt = status == MonitorHealthStatus.Ok && snapshot.Price is not null ? checkedAt : product.LastSuccessfulCheckAt;
             product.UpdatedAt = checkedAt;
 
             dbContext.PriceHistory.Add(new PriceHistory
             {
                 ProductId = product.Id,
                 Price = historyPrice,
-                Currency = snapshot.Currency,
-                IsAvailable = snapshot.IsAvailable,
+                Currency = product.Currency,
+                IsAvailable = product.IsAvailable,
                 CheckedAt = checkedAt,
                 RawHash = snapshot.RawHash,
                 Source = snapshot.Source
@@ -95,7 +105,7 @@ public sealed class ProductCheckService(
             AddCheckLog(product, status, message, snapshot, checkedAt);
 
             var alerts = status == MonitorHealthStatus.Ok
-                ? alertEvaluator.Evaluate(product, previous, snapshot)
+                ? alertEvaluator.Evaluate(product, previousOffer, snapshot)
                 : Array.Empty<AlertEvent>();
             foreach (var alert in alerts)
             {

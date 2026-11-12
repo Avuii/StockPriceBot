@@ -81,9 +81,6 @@ namespace PriceStockBot.Infrastructure.Data.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("character varying(256)");
 
-                    b.Property<bool>("EmailNotificationsEnabled")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("EmailEnableSsl")
                         .HasColumnType("boolean");
 
@@ -94,6 +91,9 @@ namespace PriceStockBot.Infrastructure.Data.Migrations
                     b.Property<string>("EmailFromName")
                         .HasMaxLength(120)
                         .HasColumnType("character varying(120)");
+
+                    b.Property<bool>("EmailNotificationsEnabled")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("EmailSmtpHost")
                         .HasMaxLength(300)
@@ -131,12 +131,12 @@ namespace PriceStockBot.Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)");
 
+                    b.Property<DateTimeOffset?>("PasswordResetTokenExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("PasswordResetTokenHash")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
-
-                    b.Property<DateTimeOffset?>("PasswordResetTokenExpiresAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTimeOffset>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -169,18 +169,51 @@ namespace PriceStockBot.Infrastructure.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PriceStockBot.Core.Domain.BrowserPushSubscription", b =>
+                {
+                    b.Property<string>("EndpointHash")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Auth")
+                        .IsRequired()
+                        .HasMaxLength(22)
+                        .HasColumnType("character varying(22)");
+
+                    b.Property<string>("Endpoint")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("character varying(2048)");
+
+                    b.Property<string>("P256dh")
+                        .IsRequired()
+                        .HasMaxLength(87)
+                        .HasColumnType("character varying(87)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("EndpointHash");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("BrowserPushSubscriptions");
+                });
+
             modelBuilder.Entity("PriceStockBot.Core.Domain.Category", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("ColorHex")
                         .HasMaxLength(16)
                         .HasColumnType("character varying(16)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("IconName")
                         .HasMaxLength(80)
@@ -328,12 +361,35 @@ namespace PriceStockBot.Infrastructure.Data.Migrations
                     b.Property<bool>("IsAvailable")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsBookmarked")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("LastCheckError")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastCheckMessage")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("LastCheckSource")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
                     b.Property<DateTimeOffset?>("LastCheckedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastRawHash")
                         .HasMaxLength(128)
                         .HasColumnType("character varying(128)");
+
+                    b.Property<DateTimeOffset?>("LastSuccessfulCheckAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MonitoringStatus")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -388,7 +444,58 @@ namespace PriceStockBot.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId", "IsActive");
 
+                    b.HasIndex("UserId", "IsBookmarked");
+
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("PriceStockBot.Core.Domain.ProductCheckLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("CheckedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("text");
+
+                    b.Property<bool?>("IsAvailable")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Level")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<decimal?>("Price")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId", "CheckedAt");
+
+                    b.ToTable("ProductCheckLogs");
                 });
 
             modelBuilder.Entity("PriceStockBot.Core.Domain.UserSession", b =>
@@ -435,6 +542,15 @@ namespace PriceStockBot.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("PriceStockBot.Core.Domain.BrowserPushSubscription", b =>
+                {
+                    b.HasOne("PriceStockBot.Core.Domain.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PriceStockBot.Core.Domain.Category", b =>
@@ -487,6 +603,17 @@ namespace PriceStockBot.Infrastructure.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("PriceStockBot.Core.Domain.ProductCheckLog", b =>
+                {
+                    b.HasOne("PriceStockBot.Core.Domain.Product", "Product")
+                        .WithMany("CheckLogs")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("PriceStockBot.Core.Domain.UserSession", b =>
                 {
                     b.HasOne("PriceStockBot.Core.Domain.AppUser", "User")
@@ -515,6 +642,8 @@ namespace PriceStockBot.Infrastructure.Data.Migrations
             modelBuilder.Entity("PriceStockBot.Core.Domain.Product", b =>
                 {
                     b.Navigation("AlertRules");
+
+                    b.Navigation("CheckLogs");
 
                     b.Navigation("Notifications");
 

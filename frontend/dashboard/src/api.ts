@@ -145,3 +145,11 @@ export const api = {
 };
 
 export type ApiClient = typeof api;
+
+export const pushApi = {
+  getPushKey: () => request<{ publicKey: string | null }>('/api/account/push/key'),
+  savePushSubscription: (subscription: { endpoint: string; p256dh?: string; auth?: string }) =>
+    request<void>('/api/account/push/subscription', { method: 'PUT', body: JSON.stringify(subscription) }),
+  removePushSubscription: (endpoint: string) =>
+    request<void>('/api/account/push/subscription', { method: 'DELETE', body: JSON.stringify({ endpoint }) }),
+};

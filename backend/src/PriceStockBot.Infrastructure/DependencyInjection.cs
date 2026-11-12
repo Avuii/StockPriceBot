@@ -22,11 +22,17 @@ public static class DependencyInjection
         services.AddDbContext<AppDbContext>(options => options.UseNpgsql(connectionString));
         services.Configure<TelegramOptions>(configuration.GetSection(TelegramOptions.SectionName));
         services.Configure<EmailOptions>(configuration.GetSection(EmailOptions.SectionName));
+        services.Configure<WebPushOptions>(configuration.GetSection(WebPushOptions.SectionName));
         services.AddHttpClient();
+        services.AddHttpClient(nameof(WebPushNotificationSender), client => client.Timeout = TimeSpan.FromSeconds(8))
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+        services.AddScoped<INotificationSender, WebPushNotificationSender>();
         services.AddHttpClient(nameof(ProductScraper), client =>
         {
             client.Timeout = TimeSpan.FromSeconds(25);
-        });
+            client.MaxResponseContentBufferSize = 4 * 1024 * 1024;
+        }).ConfigurePrimaryHttpMessageHandler(PublicStoreHttp.CreateHandler);
+        services.AddSingleton<PlaywrightStoreRenderer>();
         services.AddSingleton<PasswordHasher>();
         services.AddSingleton<SessionTokenService>();
         services.AddScoped<AlertEvaluator>();
